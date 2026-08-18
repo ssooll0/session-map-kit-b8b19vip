@@ -156,14 +156,58 @@
 
   <section class="card">
     <h2>2. 주 증상 / 통증 강도</h2>
-    <div class="grid">
-      <div><label>1순위 주 증상</label><select id="primarySymptom"></select></div>
-      <div><label>2순위 주 증상, 선택 사항</label><select id="secondarySymptom"></select></div>
-    </div>
+
     <div class="tri">
-      <div><label>1순위 NRS</label><input id="primaryPain" type="number" min="0" max="10" value="0"/></div>
-      <div><label>2순위 NRS</label><input id="secondaryPain" type="number" min="0" max="10" value="0"/></div>
-      <div><label>오늘 목표</label><input id="goal" placeholder="예: 팔 올릴 때 편해지기"/></div>
+      <div>
+        <label>1순위 주 증상</label>
+        <select id="primarySymptom"></select>
+      </div>
+
+      <div>
+        <label>1순위 좌우</label>
+        <select id="primarySide">
+          <option value="">선택 안 함</option>
+          <option>좌측</option>
+          <option>우측</option>
+          <option>양측</option>
+          <option>중앙</option>
+          <option>해당 없음</option>
+        </select>
+      </div>
+
+      <div>
+        <label>1순위 NRS</label>
+        <input id="primaryPain" type="number" min="0" max="10" value="0"/>
+      </div>
+    </div>
+
+    <div class="tri">
+      <div>
+        <label>2순위 주 증상, 선택 사항</label>
+        <select id="secondarySymptom"></select>
+      </div>
+
+      <div>
+        <label>2순위 좌우</label>
+        <select id="secondarySide">
+          <option value="">선택 안 함</option>
+          <option>좌측</option>
+          <option>우측</option>
+          <option>양측</option>
+          <option>중앙</option>
+          <option>해당 없음</option>
+        </select>
+      </div>
+
+      <div>
+        <label>2순위 NRS</label>
+        <input id="secondaryPain" type="number" min="0" max="10" value="0"/>
+      </div>
+    </div>
+
+    <div>
+      <label>오늘 목표</label>
+      <input id="goal" placeholder="예: 계단 내려갈 때 왼쪽 무릎 통증 줄이기"/>
     </div>
   </section>
 
@@ -230,11 +274,6 @@
   </section>
 
 
-  <section class="card">
-    <h2>7. 세션 반응 기록</h2>
-    <div id="sessionRecordArea"></div>
-  </section>
-
 </main>
 
 <main id="recordsTab" class="tabpage">
@@ -279,7 +318,7 @@
 </main>
 
 <script>
-const APP_PASSWORD = "bb08190425"; // 원하는 비밀번호로 변경
+const APP_PASSWORD = "BB08190425"; // 원하는 비밀번호로 변경
 
 const SYMPTOMS = ["목 통증","어깨 통증","등/날개뼈 통증","허리 통증","골반 불균형 느낌","고관절 통증","무릎 통증","발목/발 통증","자세교정/체형교정","운동 퍼포먼스 개선","통증 없음"];
 const ITEMS = [
@@ -496,15 +535,6 @@ const ITEM_INFO = {
 
 function info(problem,compensation,tests,interventions,why){return{problem,compensation,tests,interventions,why}}
 
-const TEST_PROBLEMS = {
-shoulderFlexProblems:["팔이 끝까지 안 올라감","어깨가 으쓱함","허리가 꺾임","갈비뼈가 들림","목에 힘이 들어감","좌우 차이 있음","통증 있음"],
-wallSlideProblems:["팔꿈치/손목이 벽에서 떨어짐","갈비뼈가 들림","허리가 뜸","어깨가 으쓱함","통증 있음","좌우 차이 있음"],
-thoracicRotProblems:["좌회전 제한","우회전 제한","허리가 같이 돌아감","골반이 같이 돌아감","목만 돌림","호흡이 멈춤","통증 있음"],
-hipHingeProblems:["허리 말림","허리 과신전","무릎이 너무 앞으로 나감","고관절 접힘 부족","햄스트링만 당김","균형 흔들림"],
-stepdownProblems:["무릎 안쪽 붕괴","무릎 바깥쪽 이동","발 아치 무너짐","골반 떨어짐","골반 회전","몸통 기울어짐","통증 있음"],
-lungeBalanceProblems:["앞무릎 안쪽 붕괴","골반이 한쪽으로 돌아감","허리 꺾임","발 아치 무너짐","뒤쪽 고관절 앞쪽 당김","한발서기 발 흔들림","골반 떨어짐"]
-};
-
 let currentRecordId=null, latestRecommendations=[], latestPatterns=[];
 
 function unlockApp(){
@@ -544,40 +574,186 @@ function showTabById(tabId){
   showTab(tabId, targetButton);
 }
 function init(){
- if(sessionStorage.getItem("motiUnlocked")==="yes")document.getElementById("lock").style.display="none";
- fillSelect("primarySymptom",SYMPTOMS,false);fillSelect("secondarySymptom",SYMPTOMS,true);
- makeChecks("severeItems","severe",ITEMS);makeChecks("warningItems","warning",ITEMS);makeChecks("normalItems","normal",ITEMS);
- Object.entries(TEST_PROBLEMS).forEach(([id,arr])=>makeChecks(id,id,arr));
- renderMemberList();renderSessionRecordArea();
+  if(sessionStorage.getItem("motiUnlocked")==="yes"){
+    document.getElementById("lock").style.display="none";
+  }
+
+  fillSelect("primarySymptom", SYMPTOMS, false);
+  fillSelect("secondarySymptom", SYMPTOMS, true);
+
+  makeChecks("severeItems", "severe", ITEMS);
+  makeChecks("warningItems", "warning", ITEMS);
+  makeChecks("normalItems", "normal", ITEMS);
+
+  renderMemberList();
+  renderSessionRecordArea();
 }
 function fillSelect(id,arr,none){const s=document.getElementById(id);s.innerHTML=none?'<option value="">선택 안 함</option>':'';arr.forEach(x=>s.innerHTML+=`<option>${x}</option>`)}
-function makeChecks(id,name,arr){const el=document.getElementById(id);el.innerHTML=arr.map(x=>`<label class="check"><input type="checkbox" name="${name}" value="${x}">${x}</label>`).join("")}
+function makeChecks(id,name,arr){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.innerHTML = arr.map(x=>`
+    <label class="check">
+      <input type="checkbox" name="${name}" value="${x}">${x}
+    </label>
+  `).join("");
+}
 function checked(name){return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value)}
 function setChecked(name,vals){document.querySelectorAll(`input[name="${name}"]`).forEach(x=>x.checked=(vals||[]).includes(x.value))}
 function val(id){return document.getElementById(id).value}
 function setVal(id,v){document.getElementById(id).value=v||""}
 function sevOf(item,severe,warning,normal){if(severe.includes(item))return"심각";if(warning.includes(item))return"경계";if(normal.includes(item))return"유지";return"미입력"}
 
+function sideScoreBonus(item, symptom, side, weight){
+  if(!symptom || !side) return 0;
+
+  let bonus = 0;
+
+  const lowerLimbSymptom =
+    symptom.includes("무릎") ||
+    symptom.includes("고관절") ||
+    symptom.includes("발목") ||
+    symptom.includes("발");
+
+  const upperSymptom =
+    symptom.includes("어깨") ||
+    symptom.includes("목") ||
+    symptom.includes("등") ||
+    symptom.includes("날개뼈");
+
+  const trunkSymptom =
+    symptom.includes("허리") ||
+    symptom.includes("골반");
+
+  // 하지 증상 좌우 반영
+  if(lowerLimbSymptom){
+    if(side === "좌측"){
+      if(item === "좌측 다리 정렬") bonus += weight;
+      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
+      if(item === "무릎 굴곡변형") bonus += weight * 0.4;
+    }
+
+    if(side === "우측"){
+      if(item === "우측 다리 정렬") bonus += weight;
+      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
+      if(item === "무릎 굴곡변형") bonus += weight * 0.4;
+    }
+
+    if(side === "양측"){
+      if(item === "좌측 다리 정렬" || item === "우측 다리 정렬") bonus += weight * 0.8;
+      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
+      if(item === "무릎 굴곡변형") bonus += weight * 0.5;
+    }
+  }
+
+  // 목/어깨/등 증상 좌우 반영
+  if(upperSymptom){
+    if(side === "좌측" || side === "우측"){
+      if(item === "어깨 높이 차이") bonus += weight;
+      if(item === "라운드숄더") bonus += weight * 0.5;
+      if(item === "흉추 커브 감소") bonus += weight * 0.5;
+      if(item === "척추 측만 정도") bonus += weight * 0.4;
+      if(item === "머리의 이동") bonus += weight * 0.4;
+    }
+
+    if(side === "양측"){
+      if(item === "라운드숄더") bonus += weight * 0.8;
+      if(item === "흉추 커브 감소") bonus += weight * 0.7;
+      if(item === "머리의 이동") bonus += weight * 0.5;
+    }
+
+    if(side === "중앙"){
+      if(item === "머리의 이동") bonus += weight * 0.7;
+      if(item === "흉추 커브 감소") bonus += weight * 0.5;
+      if(item === "라운드숄더") bonus += weight * 0.4;
+    }
+  }
+
+  // 허리/골반 증상 좌우 반영
+  if(trunkSymptom){
+    if(side === "좌측" || side === "우측"){
+      if(item === "골반 틀어짐") bonus += weight;
+      if(item === "골반 돌아감") bonus += weight;
+      if(item === "척추 측만 정도") bonus += weight * 0.5;
+      if(item === "요추 전만 정도") bonus += weight * 0.4;
+    }
+
+    if(side === "중앙"){
+      if(item === "요추 전만 정도") bonus += weight;
+      if(item === "골반 후방 경사") bonus += weight * 0.7;
+      if(item === "흉추 커브 감소") bonus += weight * 0.4;
+    }
+
+    if(side === "양측"){
+      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.8;
+      if(item === "요추 전만 정도") bonus += weight * 0.6;
+    }
+  }
+
+  return bonus;
+}
+
 function calculateScores(){
- const primary=val("primarySymptom"), secondary=val("secondarySymptom"), pain=Number(val("primaryPain")||0);
- const severe=checked("severe"), warning=checked("warning"), normal=checked("normal");
- const scores={};
- ITEMS.forEach(item=>{
-  let s=0;
-  if(severe.includes(item))s+=5; else if(warning.includes(item))s+=3;
-  if((SYMPTOM_ITEM_BONUS[primary]||[]).includes(item))s+=3;
-  if(secondary&&(SYMPTOM_ITEM_BONUS[secondary]||[]).includes(item))s+=1.5;
-  const cats=SYMPTOM_PRIORITY[primary]||[], idx=cats.indexOf(CATEGORY[item]);
-  if(idx===0)s+=2; else if(idx===1)s+=1;
-  if(pain>=7&&(SYMPTOM_ITEM_BONUS[primary]||[]).includes(item))s+=1.5;
-  if(val("shoulderSide")&&item==="어깨 높이 차이")s+=1.5;
-  if(val("legSide").includes("좌측")&&item==="좌측 다리 정렬")s+=2;
-  if(val("legSide").includes("우측")&&item==="우측 다리 정렬")s+=2;
-  if(val("legSide").includes("양측")&&(item==="좌측 다리 정렬"||item==="우측 다리 정렬"))s+=1.5;
-  if((val("pelvisRotation")||val("thoraxRotation")||val("thoracicLimit"))&&["골반 돌아감","척추 측만 정도","흉추 커브 감소"].includes(item))s+=1;
-  scores[item]=s;
- });
- return{scores,severe,warning,normal};
+  const primary = val("primarySymptom");
+  const primarySide = val("primarySide");
+  const secondary = val("secondarySymptom");
+  const secondarySide = val("secondarySide");
+
+  const primaryPain = Number(val("primaryPain") || 0);
+  const secondaryPain = Number(val("secondaryPain") || 0);
+
+  const severe = checked("severe");
+  const warning = checked("warning");
+  const normal = checked("normal");
+
+  const scores = {};
+
+  ITEMS.forEach(item=>{
+    let s = 0;
+
+    // 결과지 심각도 반영
+    if(severe.includes(item)) s += 5;
+    else if(warning.includes(item)) s += 3;
+
+    // 1순위 증상 부위 반영
+    if((SYMPTOM_ITEM_BONUS[primary] || []).includes(item)) s += 3;
+
+    // 2순위 증상 부위 반영
+    if(secondary && (SYMPTOM_ITEM_BONUS[secondary] || []).includes(item)) s += 1.5;
+
+    // 증상별 상부/중간/하지 우선순위 반영
+    const cats = SYMPTOM_PRIORITY[primary] || [];
+    const idx = cats.indexOf(CATEGORY[item]);
+    if(idx === 0) s += 2;
+    else if(idx === 1) s += 1;
+
+    // 통증 강도가 높을수록 주 증상 관련 항목 가중
+    if(primaryPain >= 7 && (SYMPTOM_ITEM_BONUS[primary] || []).includes(item)) s += 1.5;
+    if(secondaryPain >= 7 && secondary && (SYMPTOM_ITEM_BONUS[secondary] || []).includes(item)) s += 0.8;
+
+    // 주 증상 좌우 반영
+    s += sideScoreBonus(item, primary, primarySide, 2.5);
+    s += sideScoreBonus(item, secondary, secondarySide, 1.5);
+
+    // 별도 방향성 입력 반영
+    if(val("shoulderSide") && item === "어깨 높이 차이") s += 1.5;
+
+    if(val("legSide").includes("좌측") && item === "좌측 다리 정렬") s += 2;
+    if(val("legSide").includes("우측") && item === "우측 다리 정렬") s += 2;
+    if(val("legSide").includes("양측") && (item === "좌측 다리 정렬" || item === "우측 다리 정렬")) s += 1.5;
+
+    if(
+      (val("pelvisRotation") || val("thoraxRotation") || val("thoracicLimit")) &&
+      ["골반 돌아감","척추 측만 정도","흉추 커브 감소"].includes(item)
+    ){
+      s += 1;
+    }
+
+    scores[item] = s;
+  });
+
+  return {scores, severe, warning, normal};
 }
 
 function generateRecommendations(){
@@ -598,32 +774,127 @@ function analyzePatterns(){
  if((Lf==="외회전"&&Lir==="제한")||(Rf==="외회전"&&Rir==="제한"))p.push(pattern("발끝 외회전 + 고관절 IR 제한 패턴","발끝을 바깥으로 열어 고관절 내회전 부족을 보상할 수 있습니다. 무릎만 정면으로 강제하지 말고 고관절/발목을 같이 봐야 합니다.","prone hip IR/ER, 보행 foot progression, 스텝다운","고관절 IR 가동성, 발목 배측굴곡, foot tripod"));
  if(val("pelvisRotation")&&val("thoraxRotation"))p.push(pattern("골반-흉곽 회전 보상 패턴","골반과 흉곽이 서로 다른 방향으로 고정되면 척추 편위나 팔/보행 회전 보상으로 이어질 수 있습니다.","half-kneeling thoracic rotation, 런지 골반 정면 유지, 보행","비대칭 호흡, 흉곽-골반 분리, Pallof press"));
  if(val("shoulderSide")&&checked("thoracicRotProblems").length)p.push(pattern("어깨 높이 + 흉추/목 보상 패턴","어깨 높이 차이와 회전 제한이 같이 있으면 상부승모근/견갑거근/사각근, 1번 늑골, 흉곽 회전 보상을 확인해야 합니다.","경추 회전, 팔 올리기, 호흡 시 어깨 상승","상부승모근/견갑거근 조절, 후방 늑골 호흡, wall slide"));
- return p.concat(analyzeTests());
-}
-function analyzeTests(){
- const p=[];
- const sf=checked("shoulderFlexProblems"), ws=checked("wallSlideProblems"), tr=checked("thoracicRotProblems"), hh=checked("hipHingeProblems"), sd=checked("stepdownProblems"), lb=checked("lungeBalanceProblems");
- if(sf.includes("어깨가 으쓱함")||ws.includes("어깨가 으쓱함"))p.push(pattern("팔 올리기 상부승모근 보상","팔을 올릴 때 어깨가 먼저 올라가면 전거근/하부승모근 조절 저하 또는 흉곽 위 견갑골 안착 문제가 의심됩니다.","어깨 굴곡, wall slide, push-up plus","소흉근 이완, serratus wall slide, 하부승모근 활성"));
- if(sf.includes("갈비뼈가 들림")||ws.includes("갈비뼈가 들림")||ws.includes("허리가 뜸"))p.push(pattern("Rib flare / 복압 조절 패턴","팔을 올릴 때 갈비뼈나 허리가 뜨면 어깨 제한을 흉곽-요추 과신전으로 보상할 수 있습니다.","overhead reach, dead bug, 90/90 breathing","후방 늑골 호흡, dead bug, wall slide regression"));
- if(tr.includes("골반이 같이 돌아감")||tr.includes("허리가 같이 돌아감"))p.push(pattern("흉곽-골반 분리 부족","흉추 회전 검사에서 골반/허리가 같이 움직이면 흉추 분절 회전보다 몸통 전체로 돌리는 보상이 의심됩니다.","seated thoracic rotation, half-kneeling rotation","open book, quadruped rotation, 골반 고정 회전"));
- if(hh.includes("허리 말림"))p.push(pattern("힙힌지 허리 말림 패턴","힙힌지에서 허리가 말리면 골반 후방경사, 고관절 접기 인지 부족, 햄스트링 우세를 확인합니다.","dowel hip hinge, pelvic tilt, cat-camel","pelvic clock, cat-camel, dowel hip hinge"));
- if(hh.includes("허리 과신전"))p.push(pattern("힙힌지 요추 과신전 패턴","고관절을 접기보다 허리를 꺾어 버티는 패턴입니다. 복압과 둔근 조절을 봅니다.","dead bug, bridge, hip hinge","90/90 breathing, dead bug, bridge neutral"));
- if(sd.includes("무릎 안쪽 붕괴")||sd.includes("발 아치 무너짐"))p.push(pattern("스텝다운 하지 정렬 붕괴","스텝다운에서 무릎/아치가 무너지면 발-무릎-고관절 체인의 동적 안정성이 우선입니다.","스텝다운, 싱글레그 스쿼트, 발목 DF","short foot, 발목 가동성, 중둔근 활성"));
- if(sd.includes("골반 떨어짐")||lb.includes("골반 떨어짐"))p.push(pattern("한발지지 중둔근 지지 부족","한발 지지에서 골반이 떨어지면 지지측 중둔근/체간 조절을 우선 확인합니다.","한발서기, lateral step-down","wall press, side plank variation, lateral step-down"));
- if(lb.includes("골반이 한쪽으로 돌아감"))p.push(pattern("런지 골반 회전 조절 부족","런지에서 골반이 돌아가면 고관절 회전 제한 또는 체간 회전 제어 부족을 의심합니다.","런지, split squat, hip IR/ER","split squat pelvis square, Pallof press, hip mobility"));
  return p;
 }
+
 function pattern(title,meaning,tests,interventions){return{title,meaning,tests,interventions}}
 
-function renderSummary(){
- const a=document.getElementById("summaryArea");
- if(!latestRecommendations.length){a.innerHTML=`<div class="box warn">추천 가설이 충분하지 않습니다. 주 증상 중심으로 기능검사를 먼저 진행하세요.</div>`;return}
- const f=latestRecommendations[0], s=latestRecommendations[1], t=latestRecommendations[2];
- a.innerHTML=`<div class="box"><h3>간단 결과 해석</h3>
- <p><b>${esc(val("name"))}</b>님 1순위 증상은 <b>${val("primarySymptom")}</b>, NRS <b>${val("primaryPain")}</b>입니다. ${val("secondarySymptom")?`2순위는 <b>${val("secondarySymptom")}</b>입니다.`:""}</p>
- <p>현재 가장 먼저 볼 가설은 <b>${f.item}</b>입니다. ${s?`그다음은 <b>${s.item}</b>, `:""}${t?`세 번째는 <b>${t.item}</b>입니다.`:""}</p>
- <p class="small">결과지는 진단이 아니라 가설입니다. 실제 방향은 기능검사와 개입 후 재검사로 확인합니다.</p></div>`;
+function sideMismatchInsight(){
+  const primarySymptom = val("primarySymptom");
+  const primarySide = val("primarySide");
+
+  const secondarySymptom = val("secondarySymptom");
+  const secondarySide = val("secondarySide");
+
+  const severe = checked("severe");
+  const warning = checked("warning");
+  const problemItems = [...severe, ...warning];
+
+  const notes = [];
+
+  function checkLowerLimb(symptom, side, label){
+    if(!symptom) return;
+
+    const isLower =
+      symptom.includes("무릎") ||
+      symptom.includes("고관절") ||
+      symptom.includes("발목") ||
+      symptom.includes("발");
+
+    if(!isLower) return;
+
+    if(side === "좌측" && problemItems.includes("우측 다리 정렬")){
+      notes.push(`${label}은 좌측 하지 쪽 증상이지만, 결과지에서는 우측 다리 정렬 문제가 확인됩니다. 좌측 통증 부위만 보지 말고 우측 지지 안정성, 우측 발 아치, 우측 고관절 회전 조절을 함께 확인하는 것이 좋습니다.`);
+    }
+
+    if(side === "우측" && problemItems.includes("좌측 다리 정렬")){
+      notes.push(`${label}은 우측 하지 쪽 증상이지만, 결과지에서는 좌측 다리 정렬 문제가 확인됩니다. 우측 통증 부위만 보지 말고 좌측 지지 안정성, 좌측 발 아치, 좌측 고관절 회전 조절을 함께 확인하는 것이 좋습니다.`);
+    }
+
+    if(side === "좌측" && problemItems.includes("좌측 다리 정렬")){
+      notes.push(`${label}의 좌측 증상과 좌측 다리 정렬 문제가 같은 쪽에서 확인됩니다. 좌측 스텝다운, 좌측 한발서기, 좌측 발 아치 유지 여부를 우선 확인하세요.`);
+    }
+
+    if(side === "우측" && problemItems.includes("우측 다리 정렬")){
+      notes.push(`${label}의 우측 증상과 우측 다리 정렬 문제가 같은 쪽에서 확인됩니다. 우측 스텝다운, 우측 한발서기, 우측 발 아치 유지 여부를 우선 확인하세요.`);
+    }
+  }
+
+  checkLowerLimb(primarySymptom, primarySide, "1순위 증상");
+  checkLowerLimb(secondarySymptom, secondarySide, "2순위 증상");
+
+  if((primarySymptom.includes("어깨") || primarySymptom.includes("목")) && (primarySide === "좌측" || primarySide === "우측")){
+    if(problemItems.includes("어깨 높이 차이")){
+      notes.push(`${primarySide} 목/어깨 증상과 어깨 높이 차이가 함께 보입니다. 증상 부위만 보기보다 좌우 견갑대 높이, 상부승모근/견갑거근 보상, 흉곽 회전 차이를 같이 확인하세요.`);
+    }
+  }
+
+  if(primarySymptom.includes("허리") && (primarySide === "좌측" || primarySide === "우측")){
+    if(problemItems.includes("골반 틀어짐") || problemItems.includes("골반 돌아감")){
+      notes.push(`${primarySide} 허리 증상과 골반 비대칭 소견이 함께 보입니다. 국소 허리 문제만 보기보다 골반 회전, 체중분배, 한발서기 안정성을 같이 확인하세요.`);
+    }
+  }
+
+  return notes;
 }
+
+function renderSummary(){
+  const a = document.getElementById("summaryArea");
+
+  if(!latestRecommendations.length){
+    a.innerHTML = `
+      <div class="box warn">
+        추천 가설이 충분하지 않습니다. 주 증상 중심으로 기능검사를 먼저 진행하세요.
+      </div>
+    `;
+    return;
+  }
+
+  const f = latestRecommendations[0];
+  const s = latestRecommendations[1];
+  const t = latestRecommendations[2];
+
+  const primaryText = `${val("primarySide") ? val("primarySide") + " " : ""}${val("primarySymptom")}`;
+  const secondaryText = val("secondarySymptom")
+    ? `${val("secondarySide") ? val("secondarySide") + " " : ""}${val("secondarySymptom")}`
+    : "";
+
+  const sideNotes = sideMismatchInsight();
+
+  let html = `
+    <div class="box">
+      <h3>간단 결과 해석</h3>
+
+      <p>
+        <b>${esc(val("name"))}</b>님 1순위 증상은 
+        <b>${esc(primaryText)}</b>, NRS <b>${esc(val("primaryPain"))}</b>입니다.
+        ${secondaryText ? `2순위는 <b>${esc(secondaryText)}</b>, NRS <b>${esc(val("secondaryPain"))}</b>입니다.` : ""}
+      </p>
+
+      <p>
+        현재 가장 먼저 볼 가설은 <b>${f.item}</b>입니다.
+        ${s ? `그다음은 <b>${s.item}</b>, ` : ""}
+        ${t ? `세 번째는 <b>${t.item}</b>입니다.` : ""}
+      </p>
+
+      <p class="small">
+        결과지는 진단이 아니라 가설입니다. 실제 방향은 기능검사와 개입 후 재검사로 확인합니다.
+      </p>
+    </div>
+  `;
+
+  if(sideNotes.length){
+    html += `
+      <div class="box warn">
+        <h3>좌우 방향성 해석</h3>
+        ${sideNotes.map(n=>`<p>${esc(n)}</p>`).join("")}
+      </div>
+    `;
+  }
+
+  a.innerHTML = html;
+}
+
 function renderPatterns(){
  const a=document.getElementById("patternArea");
  if(!latestPatterns.length){a.innerHTML="";return}
@@ -808,24 +1079,61 @@ function renderMeaning(n){
 }
 
 function collectRecord(){
- return {
- id:currentRecordId||Date.now().toString(), updatedAt:new Date().toISOString(),
- name:val("name").trim(), age:val("age"), gender:val("gender"), memo:val("memo"),
- primarySymptom:val("primarySymptom"), secondarySymptom:val("secondarySymptom"), primaryPain:val("primaryPain"), secondaryPain:val("secondaryPain"), goal:val("goal"),
- severe:checked("severe"), warning:checked("warning"), normal:checked("normal"),
- directions:Object.fromEntries(["shoulderSide","legSide","pelvisRotation","thoraxRotation","thoracicLimit","pelvisHeightSide","leftFootDir","leftKneeDir","leftArch","leftHipIR","leftHipER","rightFootDir","rightKneeDir","rightArch","rightHipIR","rightHipER"].map(id=>[id,val(id)])),
- testProblems:Object.fromEntries(Object.keys(TEST_PROBLEMS).map(id=>[id,checked(id)])),
- recommendations:latestRecommendations, patterns:latestPatterns,
- sessions:[1,2,3].map(n=>({
-  action: val(`session${n}Action`),
-  problem: val(`session${n}Problem`),
-  side: val(`session${n}Side`),
-  before: val(`session${n}Before`),
-  after: val(`session${n}After`),
-  response: val(`session${n}Response`),
-  note: val(`session${n}Note`)
- })),
- }
+  return {
+    id: currentRecordId || Date.now().toString(),
+    updatedAt: new Date().toISOString(),
+
+    name: val("name").trim(),
+    age: val("age"),
+    gender: val("gender"),
+    memo: val("memo"),
+
+    primarySymptom: val("primarySymptom"),
+    primarySide: val("primarySide"),
+    primaryPain: val("primaryPain"),
+
+    secondarySymptom: val("secondarySymptom"),
+    secondarySide: val("secondarySide"),
+    secondaryPain: val("secondaryPain"),
+
+    goal: val("goal"),
+
+    severe: checked("severe"),
+    warning: checked("warning"),
+    normal: checked("normal"),
+
+    directions: Object.fromEntries([
+      "shoulderSide",
+      "legSide",
+      "pelvisRotation",
+      "thoraxRotation",
+      "thoracicLimit",
+      "pelvisHeightSide",
+      "leftFootDir",
+      "leftKneeDir",
+      "leftArch",
+      "leftHipIR",
+      "leftHipER",
+      "rightFootDir",
+      "rightKneeDir",
+      "rightArch",
+      "rightHipIR",
+      "rightHipER"
+    ].map(id=>[id, val(id)])),
+
+    recommendations: latestRecommendations,
+    patterns: latestPatterns,
+
+    sessions: [1,2,3].map(n=>({
+      action: val(`session${n}Action`),
+      problem: val(`session${n}Problem`),
+      side: val(`session${n}Side`),
+      before: val(`session${n}Before`),
+      after: val(`session${n}After`),
+      response: val(`session${n}Response`),
+      note: val(`session${n}Note`)
+    }))
+  };
 }
 function saveRecord(){
  if(!val("name").trim()){alert("이름을 입력해주세요.");return}
@@ -834,13 +1142,29 @@ function saveRecord(){
  localStorage.setItem("motiRecords",JSON.stringify(arr)); renderMemberList(); alert("저장되었습니다.");
 }
 function getRecords(){return JSON.parse(localStorage.getItem("motiRecords")||"[]")}
+
 function renderMemberList(){
- const arr=getRecords().sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
- document.getElementById("memberList").innerHTML=arr.length?arr.map(r=>`<div class="member" onclick="loadRecord('${r.id}')"><b>${esc(r.name)}</b> <span class="small">/ ${esc(r.age||"")}세 / ${esc(r.primarySymptom||"")}</span><br><span class="small">${new Date(r.updatedAt).toLocaleString("ko-KR")}</span></div>`).join(""):`<p class="small">저장된 기록이 없습니다.</p>`;
+  const arr = getRecords().sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
+
+  document.getElementById("memberList").innerHTML = arr.length
+    ? arr.map(r=>{
+        const symptomText = `${r.primarySide ? r.primarySide + " " : ""}${r.primarySymptom || ""}`;
+
+        return `
+          <div class="member" onclick="loadRecord('${r.id}')">
+            <b>${esc(r.name)}</b>
+            <span class="small"> / ${esc(r.age || "")}세 / ${esc(symptomText)}</span>
+            <br>
+            <span class="small">${new Date(r.updatedAt).toLocaleString("ko-KR")}</span>
+          </div>
+        `;
+      }).join("")
+    : `<p class="small">저장된 기록이 없습니다.</p>`;
 }
+
 function loadRecord(id){
  const r=getRecords().find(x=>x.id===id); if(!r)return; currentRecordId=r.id;
- ["name","age","gender","memo","primarySymptom","secondarySymptom","primaryPain","secondaryPain","goal"].forEach(k=>setVal(k,r[k]));
+ ["name","age","gender","memo","primarySymptom","primarySide","secondarySymptom","secondarySide","primaryPain","secondaryPain","goal"].forEach(k=>setVal(k,r[k]));
  setChecked("severe",r.severe||[]); setChecked("warning",r.warning||[]); setChecked("normal",r.normal||[]);
  Object.entries(r.directions||{}).forEach(([k,v])=>setVal(k,v));
  Object.entries(r.testProblems||{}).forEach(([k,v])=>setChecked(k,v));
