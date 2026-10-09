@@ -1,1666 +1,2727 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Session Map Kit</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session Map Kit 2.0</title>
 <style>
-  :root{
-    --bg:#f5f7fb;--card:#fff;--ink:#111827;--muted:#6b7280;
-    --blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f97316;
-    --line:#e5e7eb;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#111827;color:white;padding:22px 24px}
-  header h1{margin:0;font-size:24px}
-  header p{margin:6px 0 0;color:#d1d5db;font-size:14px}
-  main{max-width:1280px;margin:0 auto;padding:20px}
-  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 4px 14px rgba(15,23,42,.08);margin-bottom:18px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  h2{font-size:19px;margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}
-  h3{margin:14px 0 8px;font-size:16px}
-  label{display:block;font-weight:700;margin:10px 0 5px}
-  input,select,textarea{width:100%;padding:11px 10px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;background:white}
-  textarea{min-height:70px;resize:vertical}
-  button{border:0;border-radius:11px;padding:11px 15px;font-weight:800;cursor:pointer;margin:4px 4px 4px 0;min-height:42px;}
-  .primary{background:var(--blue);color:white}.green{background:var(--green);color:white}
-  .gray{background:#e5e7eb}.red{background:var(--red);color:white}
-  .checkgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .check{background:#f9fafb;border:1px solid var(--line);border-radius:9px;padding:8px;font-size:14px}
-  .check input{width:auto;margin-right:6px}
-  .box{border-left:5px solid var(--blue);background:#eff6ff;padding:12px;border-radius:9px;margin:10px 0}
-  .ok{border-left-color:#10b981;background:#ecfdf5}.warn{border-left-color:var(--orange);background:#fff7ed}
-  .bad{border-left-color:#ef4444;background:#fef2f2}
-  .small{font-size:13px;color:var(--muted)}
-  .tag{display:inline-block;background:#e0f2fe;color:#0369a1;border-radius:999px;padding:4px 8px;font-size:12px;margin:2px}
-  .member{padding:10px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px}
-  .member:hover{background:#e0f2fe}
-  .list{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px;background:#f9fafb}
-  #lock{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999}
-  #lock .panel{width:min(420px,92vw);background:white;border-radius:16px;padding:24px}
-  #lock h2{color:#111827}
-  @media(max-width:900px){.grid,.tri{grid-template-columns:1fr}.checkgrid{grid-template-columns:1fr}main{padding:12px}}
-  .tabs{
-    max-width:1280px;
-    margin:0 auto;
-    padding:12px 20px 0;
-    display:flex;
-    gap:8px;
-    background:var(--bg);
-    position:sticky;
-    top:0;
-    z-index:50;
-  }
-
-  .tabbtn{
-    background:#e5e7eb;
-    color:#111827;
-    border:1px solid #d1d5db;
-    border-radius:999px;
-    padding:10px 16px;
-    font-weight:800;
-    font-size:14px;
-  }
-
-  .tabbtn.active{
-    background:var(--blue);
-    color:white;
-    border-color:var(--blue);
-  }
-
-  .tabpage{
-    display:none;
-  }
-
-  .tabpage.active{
-    display:block;
-  }
-
-  .full-card{
-    max-width:1280px;
-    margin:0 auto;
-    padding:20px;
-  }
-
-  @media(max-width:900px){
-    .tabs{
-      padding:10px 12px 0;
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    .tabbtn{
-      flex:0 0 auto;
-      padding:10px 14px;
-      font-size:13px;
-    }
-
-    .full-card{
-      padding:12px;
-    }
-  }
+:root{
+  --bg:#f5f7fb;--card:#fff;--ink:#111827;--muted:#64748b;
+  --blue:#2563eb;--green:#15803d;--red:#b91c1c;
+  --line:#dbe2ea;--orange:#c2410c;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height:1.55;
+}
+header{padding:20px;background:#111827;color:white}
+header h1{font-size:23px;margin:0}
+header p{margin:6px 0;color:#d1d5db;font-size:14px}
+main,.tabs,.statuswrap{max-width:1200px;margin:auto}
+main{padding:16px}
+.tabs{
+  display:flex;gap:8px;overflow:auto;padding:12px 16px;
+  position:sticky;top:0;background:var(--bg);z-index:20;
+}
+button{
+  border:0;border-radius:9px;padding:11px 14px;
+  min-height:44px;cursor:pointer;font-weight:700;
+  background:#e5e7eb;color:var(--ink);margin:3px;
+}
+button.primary,.tab.active{background:var(--blue);color:white}
+button.green{background:var(--green);color:white}
+button.red{background:var(--red);color:white}
+button:disabled{opacity:.5;cursor:not-allowed}
+.tab{white-space:nowrap}
+.page{display:none}
+.page.active{display:block}
+.card{
+  background:var(--card);padding:18px;border-radius:12px;
+  margin-bottom:16px;border:1px solid var(--line);
+}
+h2{
+  font-size:19px;margin:0 0 12px;padding-bottom:8px;
+  border-bottom:1px solid var(--line);
+}
+h3{font-size:16px;margin:12px 0 8px}
+label.field{display:block;font-weight:700;margin:9px 0}
+label.field span{display:block;margin-bottom:4px}
+input,select,textarea{
+  width:100%;font-size:16px;padding:10px;border:1px solid #cbd5e1;
+  border-radius:8px;background:white;color:var(--ink);
+}
+textarea{min-height:78px;resize:vertical;line-height:1.5}
+input[type=checkbox]{width:auto;margin-right:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.small{font-size:13px;color:var(--muted)}
+.box{
+  background:#eff6ff;border-left:4px solid var(--blue);
+  padding:12px;border-radius:7px;margin:10px 0;
+}
+.warn{background:#fff7ed;border-left-color:var(--orange)}
+.bad{background:#fef2f2;border-left-color:var(--red)}
+.ok{background:#f0fdf4;border-left-color:var(--green)}
+.check{
+  display:flex;align-items:flex-start;gap:4px;padding:9px;
+  border:1px solid var(--line);border-radius:8px;margin:6px 0;
+  background:#f8fafc;font-size:14px;
+}
+.check input{flex:0 0 auto;margin-top:5px}
+.findings{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
+}
+.finding{
+  border:1px solid var(--line);border-radius:8px;
+  padding:9px;background:#f8fafc;
+}
+.tag{
+  display:inline-block;padding:3px 8px;background:#e0f2fe;
+  color:#075985;border-radius:20px;font-size:12px;margin:2px;
+}
+.member{
+  border-bottom:1px solid var(--line);padding:12px 0;
+}
+.member button{text-align:left;width:100%;background:#f1f5f9}
+pre{
+  white-space:pre-wrap;overflow-wrap:anywhere;background:#f8fafc;
+  border:1px solid var(--line);border-radius:8px;padding:12px;
+}
+details{margin:10px 0}
+summary{cursor:pointer;font-weight:700}
+#lock{
+  position:fixed;inset:0;z-index:100;
+  background:#0f172a;display:flex;align-items:center;justify-content:center;
+}
+#lock.hidden{display:none}
+.lockpanel{
+  width:min(440px,92vw);background:white;padding:24px;border-radius:14px;
+}
+.statuswrap{padding:0 16px}
+#status{margin:0 0 10px;font-size:14px;overflow-wrap:anywhere}
+.stickyactions{
+  position:sticky;bottom:0;background:rgba(245,247,251,.97);
+  padding:9px;border-top:1px solid var(--line);z-index:15;
+}
+a{color:#1d4ed8}
+@media(max-width:850px){
+  .grid,.tri,.findings{grid-template-columns:1fr}
+  main{padding:12px}
+  .card{padding:13px}
+}
+@media print{
+  #lock,.tabs,.stickyactions,header button,#status,
+  .noprint{display:none!important}
+  body{background:white}
+  .page{display:none!important}
+  #inputPage{display:block!important}
+  .card{break-inside:auto;box-shadow:none}
+  textarea{min-height:60px}
+}
 </style>
 </head>
 <body>
 
 <div id="lock">
-  <div class="panel">
-    <h2>앱 잠금</h2>
-    <p class="small">개인용 세션 평가 및 기록 도구입니다.</p>
-    <label>비밀번호</label>
-    <input id="passwordInput" type="password" placeholder="비밀번호 입력"/>
-    <button class="primary" onclick="unlockApp()">접속</button>
-    <p id="lockMsg" class="small"></p>
+  <div class="lockpanel">
+    <h2>アプリではなく個人用の画面ロック</h2>
+    <p class="small" id="lockExplanation"></p>
+    <form id="unlockForm">
+      <label class="field">
+        <span>비밀번호</span>
+        <input id="passwordInput" type="password"
+          autocomplete="current-password" required>
+      </label>
+      <button class="primary" type="submit">접속</button>
+    </form>
+    <p id="lockMessage" class="small" role="status"></p>
   </div>
 </div>
 
 <header>
-  <h1>Session Map Kit</h1>
-  <p>결과지 · 증상 · 방향성 · 세션 반응을 기록하는 개인용 실험실</p>
+  <h1>Session Map Kit 2.0</h1>
+  <p>규칙 기반 평가 후보 · 근육 참고 · 회차별 기록 도구</p>
+  <button id="lockButton" type="button">앱 잠그기</button>
 </header>
 
-<nav class="tabs">
-  <button class="tabbtn active" onclick="showTab('inputTab', this)">새 세션 입력</button>
-  <button class="tabbtn" onclick="showTab('recordsTab', this)">회원 기록</button>
-  <button class="tabbtn" onclick="showTab('backupTab', this)">백업/복원</button>
+<nav class="tabs" aria-label="화면 이동">
+  <button class="tab active" data-tab="inputPage">세션 입력</button>
+  <button class="tab" data-tab="recordsPage">회원·회차 기록</button>
+  <button class="tab" data-tab="backupPage">백업·복원</button>
+  <button class="tab" data-tab="helpPage">원칙·출처·점검</button>
 </nav>
 
-<main id="inputTab" class="tabpage active">
+<div class="statuswrap">
+  <p id="status" role="status"></p>
+</div>
+
+<main id="inputPage" class="page active">
   <section class="card">
-    <h2>1. 회원 기본 정보</h2>
-    <label>이름</label>
-    <input id="name" placeholder="예: 홍길동"/>
-
-    <label>나이</label>
-    <input id="age" type="number" min="1" max="120"/>
-
-    <label>성별</label>
-    <select id="gender">
-      <option value="">선택 안 함</option>
-      <option>남성</option>
-      <option>여성</option>
-      <option>기타/미기재</option>
-    </select>
-
-    <label>메모</label>
-    <textarea id="memo" placeholder="직업, 운동, 생활습관, 과거 손상 등"></textarea>
-
-    <div style="margin-top:12px;">
-      <button class="gray" onclick="newRecord()">새 기록</button>
-      <button class="green" onclick="saveRecord()">현재 기록 저장/수정</button>
-      <button class="red" onclick="deleteCurrentRecord()">현재 기록 삭제</button>
+    <h2>1. 회원·세션 기본 정보</h2>
+    <p class="small" id="recordIdentity"></p>
+    <div id="basicFields" class="tri"></div>
+    <div class="noprint">
+      <button id="newMemberButton">새 회원·새 기록</button>
+      <button id="followupButton">같은 회원 새 회차</button>
+      <button id="saveTopButton" class="green">저장·수정</button>
     </div>
   </section>
 
   <section class="card">
-    <h2>2. 주 증상 / 통증 강도</h2>
-
-    <div class="tri">
-      <div>
-        <label>1순위 주 증상</label>
-        <select id="primarySymptom"></select>
-      </div>
-
-      <div>
-        <label>1순위 좌우</label>
-        <select id="primarySide">
-          <option value="">선택 안 함</option>
-          <option>좌측</option>
-          <option>우측</option>
-          <option>양측</option>
-          <option>중앙</option>
-          <option>해당 없음</option>
-        </select>
-      </div>
-
-      <div>
-        <label>1순위 NRS</label>
-        <input id="primaryPain" type="number" min="0" max="10" value="0"/>
-      </div>
+    <h2>2. 안전성 확인·진행 범위</h2>
+    <div class="box warn">
+      완전한 진단·배제 도구가 아닙니다.
+      현재 우려되는 변화는 촬영 등급보다 우선합니다.
+      과거 병력만으로 자동 응급 판정하지 않고,
+      새 변화와 현재 상태를 구분해 기록하세요.
     </div>
-
-    <div class="tri">
-      <div>
-        <label>2순위 주 증상, 선택 사항</label>
-        <select id="secondarySymptom"></select>
-      </div>
-
-      <div>
-        <label>2순위 좌우</label>
-        <select id="secondarySide">
-          <option value="">선택 안 함</option>
-          <option>좌측</option>
-          <option>우측</option>
-          <option>양측</option>
-          <option>중앙</option>
-          <option>해당 없음</option>
-        </select>
-      </div>
-
-      <div>
-        <label>2순위 NRS</label>
-        <input id="secondaryPain" type="number" min="0" max="10" value="0"/>
-      </div>
-    </div>
-
-    <div>
-      <label>오늘 목표</label>
-      <input id="goal" placeholder="예: 계단 내려갈 때 왼쪽 무릎 통증 줄이기"/>
-    </div>
+    <div id="emergencyChecks"></div>
+    <div id="concernChecks"></div>
+    <div id="safetyFields" class="grid"></div>
+    <div id="safetyOutput"></div>
   </section>
 
   <section class="card">
-    <h2>3. 결과 입력</h2>
-    <p class="small">심각/경계/유지 중복 체크는 피해주세요. 유지 항목은 입력하지 않아도 분석됩니다.</p>
-    <div class="grid">
-      <div><h3>심각</h3><div id="severeItems" class="checkgrid"></div></div>
-      <div><h3>경계</h3><div id="warningItems" class="checkgrid"></div></div>
-    </div>
-    <h3>유지, 선택 사항</h3><div id="normalItems" class="checkgrid"></div>
-  </section>
-
-  <section class="card">
-    <h2>4. 좌우 / 방향성 입력, 모두 선택 사항</h2>
-    <div class="tri">
-      <div><label>어깨 높이</label><select id="shoulderSide"><option value="">선택 안 함</option><option>좌측 어깨 높음</option><option>우측 어깨 높음</option><option>방향 미확인</option></select></div>
-      <div><label>하지 정렬</label><select id="legSide"><option value="">선택 안 함</option><option>좌측 다리 정렬 문제</option><option>우측 다리 정렬 문제</option><option>양측 다리 정렬 문제</option><option>방향 미확인</option></select></div>
-      <div><label>골반 회전 방향</label><select id="pelvisRotation"><option value="">선택 안 함</option><option>좌측 골반 전방</option><option>우측 골반 전방</option><option>방향 미확인</option></select></div>
-    </div>
-
-    <div class="tri">
-      <div><label>흉곽 회전 우세</label><select id="thoraxRotation"><option value="">선택 안 함</option><option>좌회전 우세</option><option>우회전 우세</option><option>방향 미확인</option></select></div>
-      <div><label>흉추 회전 제한</label><select id="thoracicLimit"><option value="">선택 안 함</option><option>좌회전 제한</option><option>우회전 제한</option><option>양측 제한</option></select></div>
-      <div><label>골반 높이 방향</label><select id="pelvisHeightSide"><option value="">선택 안 함</option><option>좌측 높음</option><option>우측 높음</option><option>방향 미확인</option></select></div>
-      <div><label>흉추 커브 방향</label><select id="thoracicCurveDir"><option value="">선택 안 함</option><option>흉추 커브 증가</option><option>흉추 커브 감소</option><option>방향 미확인</option></select></div>
-      <div><label>골반 경사 방향</label><select id="pelvicTiltDir"><option value="">선택 안 함</option><option>골반 전방 경사</option><option>골반 후방 경사</option><option>방향 미확인</option></select></div>
-      <div><label>요추 전만 방향</label><select id="lumbarCurveDir"><option value="">선택 안 함</option><option>요추 전만 증가</option><option>요추 전만 감소</option><option>방향 미확인</option></select></div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <h3>좌측 하지 세부</h3>
-        <label>좌측 발끝 방향</label><select id="leftFootDir"><option value="">미확인</option><option>정면</option><option>내회전</option><option>외회전</option></select>
-        <label>좌측 무릎 방향</label><select id="leftKneeDir"><option value="">미확인</option><option>정면</option><option>안쪽 붕괴</option><option>바깥쪽 이동</option></select>
-        <label>좌측 발 아치</label><select id="leftArch"><option value="">미확인</option><option>유지</option><option>무너짐</option><option>높은 아치/과긴장</option></select>
-        <label>좌측 고관절 IR</label><select id="leftHipIR"><option value="">미확인</option><option>정상</option><option>제한</option><option>과다</option></select>
-        <label>좌측 고관절 ER</label><select id="leftHipER"><option value="">미확인</option><option>정상</option><option>제한</option><option>과다</option></select>
-      </div>
-      <div>
-        <h3>우측 하지 세부</h3>
-        <label>우측 발끝 방향</label><select id="rightFootDir"><option value="">미확인</option><option>정면</option><option>내회전</option><option>외회전</option></select>
-        <label>우측 무릎 방향</label><select id="rightKneeDir"><option value="">미확인</option><option>정면</option><option>안쪽 붕괴</option><option>바깥쪽 이동</option></select>
-        <label>우측 발 아치</label><select id="rightArch"><option value="">미확인</option><option>유지</option><option>무너짐</option><option>높은 아치/과긴장</option></select>
-        <label>우측 고관절 IR</label><select id="rightHipIR"><option value="">미확인</option><option>정상</option><option>제한</option><option>과다</option></select>
-        <label>우측 고관절 ER</label><select id="rightHipER"><option value="">미확인</option><option>정상</option><option>제한</option><option>과다</option></select>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>5. 분석 및 세션 추천</h2>
-    <button class="primary" onclick="generateRecommendations()">결과 해석 / 세션 추천 생성</button>
-    <button class="green" onclick="saveRecord()">현재 기록 저장/수정</button>
-    <div id="summaryArea"></div>
-    <div id="patternArea"></div>
-    <div id="recommendationArea"></div>
-  </section>
-
-  <section class="card">
-    <h2>6. 추천 세션 진행 후 반응 기록</h2>
+    <h2>3. 증상·목표·기준 과제</h2>
+    <div id="symptomFields" class="tri"></div>
+    <div id="taskFields" class="grid"></div>
     <p class="small">
-      위에서 추천된 세션이나 기능검사를 실제로 진행한 뒤, 전후 변화와 반응을 입력하세요.
-      이 기록을 바탕으로 가설이 맞았는지 다시 해석합니다.
+      NRS 0은 실제로 통증이 없음을 확인한 경우에 입력하세요.
+      미측정은 빈칸으로 둡니다. 통증이 없으면 수행·안정감·범위를 비교하세요.
     </p>
-    <div id="sessionRecordArea"></div>
   </section>
 
+  <section class="card">
+    <h2>4. 모티피지오 촬영 소견</h2>
+    <div class="box">
+      심각·경계·유지는 결과지의 분류명입니다.
+      의료적 위험도, 특정 근육의 상태, 통증 원인,
+      치료 필요성으로 자동 변환하지 않습니다.
+    </div>
+    <div id="photoFields" class="grid"></div>
+    <div id="findingFields" class="findings"></div>
+    <details>
+      <summary>촬영에서 확인한 방향·형태 — 선택 사항</summary>
+      <div id="photoDirectionFields" class="tri"></div>
+    </details>
+    <div id="photoOutput"></div>
+  </section>
 
+  <section class="card">
+    <h2>5. 추가 평가로 확인한 사실</h2>
+    <p class="small">
+      아래 값은 촬영 결과에서 추정하지 말고,
+      직접 평가했을 때만 입력하세요.
+      범위 제한은 평가 방법·조건·증상과 함께 해석합니다.
+    </p>
+    <div id="examFields" class="tri"></div>
+  </section>
+
+  <section class="card">
+    <h2>6. 평가 후보·연관 근육 참고</h2>
+    <div class="box">
+      후보는 입력된 사실을 정리하는 규칙 기반 문장입니다.
+      임상적으로 검증된 원인 예측이나 자동 처방이 아닙니다.
+      내용이 맞지 않으면 수정·제외하고,
+      오늘 확인할 후보를 직접 선택하세요.
+    </div>
+    <button id="generateButton" class="primary">
+      가설 후보 생성·갱신
+    </button>
+    <div id="analysisOutput"></div>
+    <div id="hypothesisArea"></div>
+    <details>
+      <summary>다른 촬영 소견의 근육·영역 참고 목록</summary>
+      <div id="referenceOutput"></div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>7. 실제 진행·홈계획·다음 결정</h2>
+    <div id="closingFields" class="grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>8. 이전 형식 기록·이전 가설 보관</h2>
+    <p class="small">
+      후보를 재생성할 때 기존 가설·평가 기록은 이 영역에 보관합니다.
+      이전 형식으로 가져온 세션도 원문 데이터로 보존합니다.
+    </p>
+    <div id="archiveOutput"></div>
+  </section>
+
+  <div class="stickyactions noprint">
+    <button id="saveBottomButton" class="green">현재 회차 저장</button>
+    <button id="printButton">인쇄·PDF 저장</button>
+  </div>
 </main>
 
-<main id="recordsTab" class="tabpage">
+<main id="recordsPage" class="page">
   <section class="card">
-    <h2>회원 기록</h2>
+    <h2>회원·회차 기록</h2>
     <p class="small">
-      저장된 회원 기록을 선택하면 입력 화면으로 불러옵니다.
-      기록은 이 기기의 Safari localStorage에만 저장됩니다.
+      이 브라우저의 같은 사이트 저장 공간에 보관됩니다.
+      다른 기기에 같은 주소로 접속해도 자동 공유되지 않습니다.
+      이름만으로 회원을 자동 합치지 않습니다.
     </p>
-
-    <div style="margin-bottom:12px;">
-      <button class="gray" onclick="newRecord(); showTabById('inputTab')">새 기록 작성</button>
-      <button class="red" onclick="deleteCurrentRecord()">현재 불러온 기록 삭제</button>
-    </div>
-
-    <div id="memberList" class="list"></div>
+    <label class="field">
+      <span>이름·회원 ID 검색</span>
+      <input id="searchInput" placeholder="검색">
+    </label>
+    <div id="recordList"></div>
   </section>
 </main>
 
-<main id="backupTab" class="tabpage">
+<main id="backupPage" class="page">
   <section class="card">
-    <h2>백업 / 복원</h2>
-    <p class="small">
-      Safari 사이트 데이터를 삭제하거나 기기를 바꾸면 기록이 사라질 수 있습니다.
-      실명을 사용한다면 정기적으로 JSON 백업을 권장합니다.
-    </p>
-
-    <div class="grid">
-      <div class="card">
-        <h3>JSON 백업</h3>
-        <p class="small">현재 기기에 저장된 모든 회원 기록을 JSON 파일로 저장합니다.</p>
-        <button class="gray" onclick="exportData()">JSON 백업 다운로드</button>
-      </div>
-
-      <div class="card">
-        <h3>JSON 복원</h3>
-        <p class="small">이전에 백업한 JSON 파일을 불러옵니다. 기존 기록은 백업 파일 내용으로 교체됩니다.</p>
-        <input type="file" accept=".json" onchange="importData(event)"/>
-      </div>
+    <h2>백업·복원</h2>
+    <div class="box warn">
+      앱 데이터와 JSON 백업은 이 버전에서 암호화되지 않습니다.
+      백업 파일을 외부에 공유하지 마세요.
+      Safari 사이트 데이터 삭제, 사생활 보호 모드 종료,
+      사이트 주소·브라우저 환경 변경 등으로 접근이 달라지거나
+      데이터가 유실될 수 있습니다.
     </div>
+    <button id="exportButton" class="green">전체 JSON 백업</button>
+    <button id="legacyButton">이전 motiRecords 가져오기</button>
+    <label class="field">
+      <span>백업 JSON 복원</span>
+      <input id="importFile" type="file" accept=".json,application/json">
+    </label>
+    <p class="small">
+      복원은 현재 새 형식 기록을 교체합니다.
+      교체 전 현재 데이터 백업을 다운로드한 뒤 확인합니다.
+      다운로드 파일이 실제 저장됐는지도 확인하세요.
+      이전 motiRecords 저장 키는 삭제하지 않습니다.
+    </p>
+  </section>
+</main>
+
+<main id="helpPage" class="page">
+  <section class="card">
+    <h2>사용 원칙</h2>
+    <ul>
+      <li>안전성 확인 → 목표·과제 → 후보 → 평가 → 재평가 → 다음 결정 순서입니다.</li>
+      <li>촬영 미입력은 유지·정상으로 간주하지 않습니다.</li>
+      <li>유지 소견도 증상이나 기능 문제를 배제하지 않습니다.</li>
+      <li>정적 촬영만으로 근육 긴장·약화·고정 변형을 판단하지 않습니다.</li>
+      <li>근육 참고 목록은 관련 움직임을 떠올리는 목록이지 이상 판정이 아닙니다.</li>
+      <li>단기 개선은 원인 확정이 아닙니다. 반복·다음 날 반응도 확인합니다.</li>
+      <li>난이도·부하는 증상, 수행, 회복 반응과 개인 목표를 보고 직접 결정합니다.</li>
+      <li>수기·운동·기기 사용은 자격·업무 범위·제품 지침·센터 절차를 따릅니다.</li>
+      <li>목 앞쪽·사각근·늑골 등에 대한 수기 방법이나 강도를 자동 처방하지 않습니다.</li>
+      <li>본 도구는 의료 평가나 기존 상담·진료 기록을 대체하지 않습니다.</li>
+    </ul>
+    <h3>후보 선정 규칙</h3>
+    <p>
+      촬영 참고 목록의 정렬에만 심각 2, 경계 1을 사용합니다.
+      같은 부위라는 이유로 동점일 때 먼저 표시할 수 있지만,
+      이것은 화면 정리 규칙이지 임상적 중증도나 확률이 아닙니다.
+      통증 강도와 방향 미확인은 점수에 더하지 않습니다.
+    </p>
+    <h3>저장·잠금</h3>
+    <p>
+      외부 서버 전송 코드와 외부 스크립트는 포함하지 않았습니다.
+      다만 배포 사이트에서 별도로 삽입하는 코드까지 보장하지는 않습니다.
+      화면 잠금은 인증·암호화가 아닙니다.
+      아이패드 기기 잠금과 백업 접근 관리를 함께 사용하세요.
+    </p>
+    <h3>참고 자료</h3>
+    <ul>
+      <li>
+        <a href="https://www.nice.org.uk/guidance/ng59/chapter/recommendations"
+           target="_blank" rel="noopener noreferrer">
+          NICE NG59 — 허리 통증 평가·개인화된 관리 원칙
+        </a>
+        <span class="small">: 허리 통증 지침이며 모든 부위에 동일 적용한 것은 아닙니다.</span>
+      </li>
+      <li>
+        <a href="https://www.nhs.uk/conditions/back-pain/"
+           target="_blank" rel="noopener noreferrer">
+          NHS — 허리 통증의 의료 평가·응급 안내
+        </a>
+      </li>
+      <li>
+        <a href="https://www.ncbi.nlm.nih.gov/sites/books/NBK513334/"
+           target="_blank" rel="noopener noreferrer">
+          NCBI Bookshelf — 대퇴사두근 해부학 참고
+        </a>
+      </li>
+      <li>
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"
+           target="_blank" rel="noopener noreferrer">
+          MDN — localStorage 저장 동작
+        </a>
+      </li>
+    </ul>
+    <p class="small">
+      참고 자료가 이 앱의 가설 선정 규칙을 검증했다는 뜻은 아닙니다.
+      모티피지오의 독자적 측정 기준·정확도는 별도 확인이 필요합니다.
+    </p>
+    <button id="testButton">기본 논리 자체 점검</button>
+    <pre id="testOutput"></pre>
   </section>
 </main>
 
 <script>
-const APP_PASSWORD = "bb08190425";
+"use strict";
+
+/* 반드시 본인만 사용하는 새 값으로 변경하세요.
+   이 비밀번호는 화면 잠금용이며 암호화·서버 인증이 아닙니다. */
+const APP_PASSWORD = "bb970425";
+const STORAGE_KEY = "sessionMapKit.v2";
+const LEGACY_KEY = "motiRecords";
+const VERSION = 2;
+const AUTO_LOCK_MS = 10 * 60 * 1000;
+const MAX_FILE_BYTES = 8 * 1024 * 1024;
+const MAX_RECORDS = 5000;
+const MAX_TEXT = 12000;
+
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "")
+  .replaceAll("&","&amp;").replaceAll("<","&lt;")
+  .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+const text = value => typeof value === "string"
+  ? value.slice(0, MAX_TEXT) : "";
+const copy = value => JSON.parse(JSON.stringify(value));
+const uid = () => globalThis.crypto?.randomUUID
+  ? crypto.randomUUID()
+  : "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+const validId = value => typeof value === "string" &&
+  /^[A-Za-z0-9_-]{1,100}$/.test(value);
+function today(){
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,"0"),
+    String(d.getDate()).padStart(2,"0")
+  ].join("-");
+}
+function cleanDate(value){
+  return /^\d{4}-\d{2}-\d{2}$/.test(value || "") ? value : today();
+}
+function numberOrNull(value){
+  if(value === "" || value === null || value === undefined) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
 
 const SYMPTOMS = [
-  "목 통증",
-  "어깨 통증",
-  "등/날개뼈 통증",
-  "허리 통증",
-  "골반 불균형 느낌",
-  "고관절 통증",
-  "무릎 통증",
-  "발목/발 통증",
-  "자세교정/체형교정",
-  "운동 퍼포먼스 개선",
-  "통증 없음"
+  "선택 안 함","목 통증","어깨 통증","등/날개뼈 통증",
+  "허리 통증","골반 불균형 느낌","고관절 통증",
+  "무릎 통증","발목/발 통증","자세·체형 상담",
+  "운동 퍼포먼스 개선","통증 없음","기타"
+];
+const REGION_BY_SYMPTOM = {
+  "목 통증":"neck",
+  "어깨 통증":"shoulder",
+  "등/날개뼈 통증":"thorax",
+  "허리 통증":"trunk",
+  "골반 불균형 느낌":"hip",
+  "고관절 통증":"hip",
+  "무릎 통증":"knee",
+  "발목/발 통증":"foot",
+  "자세·체형 상담":"general",
+  "운동 퍼포먼스 개선":"general",
+  "통증 없음":"general",
+  "기타":"general",
+  "선택 안 함":"general"
+};
+const SIDE = ["선택 안 함","좌측","우측","양측","중앙","해당 없음"];
+const STATUS_OPTIONS = ["미입력","유지","경계","심각"];
+const UNKNOWN = "미확인";
+const RANGE_OPTIONS = [UNKNOWN,"제한を確認","左右差を確認","明確な制限を確認せず"];
+/* 표시 언어를 한국어로 통일 */
+RANGE_OPTIONS.splice(1,3,"제한 확인","좌우 차이 확인","뚜렷한 제한 확인하지 않음");
+
+function spec(id,label,type="text",options=null,placeholder=""){
+  return {id,label,type,options,placeholder};
+}
+const BASIC = [
+  spec("name","이름 또는 관리용 식별명"),
+  spec("age","나이 — 선택 사항","number"),
+  spec("gender","성별","select",["미기재","남성","여성","기타"]),
+  spec("date","세션 날짜","date"),
+  spec("visit","회차","number"),
+  spec("staff","담당자"),
+  spec("memo","기본 메모","textarea")
+];
+const SAFETY = [
+  spec("safetyStatus","안전성 확인·진행 판단","select",[
+    "미확인","확인 후 진행","확인 후 제한적 진행",
+    "진행 보류·의료 평가","응급 평가 우선"
+  ]),
+  spec("safetyNote","확인 내용·판단 근거·실제 조치","textarea",null,
+    "새 변화의 발생 시점·현재 상태·확인 내용·조치"),
+  spec("limits","진행 제한·중단 기준","textarea",null,
+    "허용한 범위·피할 부하·추가 확인이 필요한 내용")
+];
+const SYMPTOM_FIELDS = [
+  spec("primarySymptom","1순위 증상·상담 목적","select",SYMPTOMS),
+  spec("primarySide","1순위 좌우","select",SIDE),
+  spec("primaryPain","현재 NRS — 미측정은 빈칸","number"),
+  spec("secondarySymptom","2순위 — 선택 사항","select",SYMPTOMS),
+  spec("secondarySide","2순위 좌우","select",SIDE),
+  spec("secondaryPain","2순위 NRS — 미측정은 빈칸","number")
+];
+const TASK = [
+  spec("goal","회원이 원하는 변화"),
+  spec("taskKind","기준 과제 종류","select",[
+    "선택 안 함","목 돌리기","팔 올리기","몸통 회전",
+    "허리 굽히기·펴기","힙힌지","스쿼트","계단·스텝다운",
+    "한발서기","걷기","달리기","앉기·서기","기타"
+  ]),
+  spec("task","구체적인 기준 과제","textarea",null,
+    "예: 10cm 발판에서 왼발 지지로 내려가기 3회"),
+  spec("conditions","기준 조건","textarea",null,
+    "높이·범위·속도·반복·발 위치·보조 지지·신발"),
+  spec("onset","시작·계기·경과","textarea"),
+  spec("aggravating","발생·증가 조건","textarea"),
+  spec("easing","줄어드는 조건","textarea"),
+  spec("dailyResponse","그날 밤·다음 날 반응","textarea"),
+  spec("loadChange","최근 활동량·업무·운동 변화","textarea"),
+  spec("homeResponse","지난 홈운동 시행·반응·미시행 이유","textarea"),
+  spec("recovery","수면·피로·회복·회원 우려","textarea")
+];
+const PHOTO = [
+  spec("photoConditions","촬영 조건","textarea",null,
+    "복장·신발·발 위치·지시·촬영 시점"),
+  spec("photoQuality","촬영 조건 확인","select",[
+    "미확인","기록함","조건 차이·불확실성 있음"
+  ]),
+  spec("photoValues","원본 지표명·값·단위","textarea"),
+  spec("photoLimits","촬영 조건 차이·해석 한계","textarea")
+];
+const PHOTO_DIR = [
+  spec("shoulderSide","어깨 높이","select",
+    [UNKNOWN,"좌측 높음","우측 높음"]),
+  spec("pelvisHeightSide","골반 높이","select",
+    [UNKNOWN,"좌측 높음","우측 높음"]),
+  spec("pelvisRotation","결과지의 골반 회전 방향","select",
+    [UNKNOWN,"좌측 골반 전방","우측 골반 전방"]),
+  spec("thoraxRotation","결과지의 흉곽 회전 방향","select",
+    [UNKNOWN,"좌회전","우회전"]),
+  spec("thoracicCurveDir","흉추 커브 방향","select",
+    [UNKNOWN,"증가","감소"]),
+  spec("pelvicTiltDir","골반 경사 방향","select",
+    [UNKNOWN,"전방 경사","후방 경사"]),
+  spec("lumbarCurveDir","요추 전만 방향","select",
+    [UNKNOWN,"증가","감소"]),
+  spec("leftFootDir","좌측 서기 발끝 방향","select",
+    [UNKNOWN,"정면","안쪽","바깥쪽"]),
+  spec("rightFootDir","우측 서기 발끝 방향","select",
+    [UNKNOWN,"정면","안쪽","바깥쪽"]),
+  spec("leftArch","좌측 서기 아치 형태","select",
+    [UNKNOWN,"관찰상 유지","낮게 관찰","높게 관찰"]),
+  spec("rightArch","우측 서기 아치 형태","select",
+    [UNKNOWN,"관찰상 유지","낮게 관찰","높게 관찰"])
+];
+const EXAM = [
+  spec("thoracicLimit","직접 평가한 흉추 회전","select",RANGE_OPTIONS),
+  spec("leftAnkleDF","좌측 발목 배측굴곡","select",RANGE_OPTIONS),
+  spec("rightAnkleDF","우측 발목 배측굴곡","select",RANGE_OPTIONS),
+  spec("leftHipIR","좌측 고관절 내회전","select",RANGE_OPTIONS),
+  spec("rightHipIR","우측 고관절 내회전","select",RANGE_OPTIONS),
+  spec("leftHipER","좌측 고관절 외회전","select",RANGE_OPTIONS),
+  spec("rightHipER","우측 고관절 외회전","select",RANGE_OPTIONS),
+  spec("leftKneeExtension","좌측 무릎 신전","select",RANGE_OPTIONS),
+  spec("rightKneeExtension","우측 무릎 신전","select",RANGE_OPTIONS),
+  spec("dynamicKnee","실제 과제의 무릎 움직임","select",[
+    UNKNOWN,"좌측 안쪽 이동 관찰","우측 안쪽 이동 관찰",
+    "양측 안쪽 이동 관찰","다른 움직임 관찰",
+    "특이 움직임 확인하지 않음"
+  ]),
+  spec("examMethod","평가 방법·조건·측정값","textarea"),
+  spec("examSymptoms","평가 중 재현된 증상·수행","textarea"),
+  spec("examFacts","그 밖의 직접 확인한 사실","textarea")
+];
+const CLOSING = [
+  spec("actualWork","실제 진행 전체 요약","textarea",null,
+    "수기·운동·시간·반복·강도·기기 제품/설정·반응"),
+  spec("adverse","이상 반응·중단·감량·실제 조치","textarea"),
+  spec("homePlan","홈계획","textarea",null,
+    "운동명·범위·양·빈도·중단/감량 기준"),
+  spec("memberExplanation","회원에게 설명한 변화·불확실성","textarea"),
+  spec("understanding","회원 이해 확인","select",[
+    "미확인","말로 재설명","직접 시연","추가 설명 필요"
+  ]),
+  spec("nextDecision","다음 결정","select",[
+    "미정","유지","진행 검토","감량·수정","추가 평가",
+    "의료 평가","종료·자가관리"
+  ]),
+  spec("nextCriteria","다음 확인 지표·진행 기준","textarea"),
+  spec("reflection","담당자 성찰 — 사실 기록과 구분","textarea")
+];
+const ALL_SPECS = [
+  ...BASIC,...SAFETY,...SYMPTOM_FIELDS,...TASK,...PHOTO,
+  ...PHOTO_DIR,...EXAM,...CLOSING
+];
+const INPUT_IDS = new Set(ALL_SPECS.map(x=>x.id));
+
+const EMERGENCY_FLAGS = [
+  ["chest","현재 흉통 또는 심한 호흡곤란 등 응급 상황이 의심됨"],
+  ["neuro","갑작스러운 말·시야 변화 또는 편측 힘 빠짐 등 응급 신경학적 변화가 의심됨"],
+  ["cauda","허리 증상과 함께 새 배뇨·배변 조절 변화 또는 회음부 감각 변화가 있음"],
+  ["trauma","큰 사고 후 심한 증상 등 응급 평가가 필요한 상황이 의심됨"]
+];
+const CONCERN_FLAGS = [
+  ["progress","새롭거나 진행하는 감각·근력 변화"],
+  ["infection","발열·오한·전신 불편과 관련 증상 또는 감염 우려"],
+  ["swelling","새 한쪽 다리 부종·색 변화 등 우려되는 변화"],
+  ["history","암 병력·최근 수술·골절·관련 병력으로 추가 확인 필요"],
+  ["systemic","설명되지 않는 체중 감소·야간 증상·전신 변화"],
+  ["inflammatory","지속되는 아침 뻣뻣함·관련 염증성 병력"],
+  ["visceral","골반·복부·비뇨기·부인과 관련 새 증상"],
+  ["device","약물·기기 사용 적합성 또는 기타 안전성 확인 필요"]
 ];
 
-const ITEMS = [
-  "머리의 이동",
-  "어깨 높이 차이",
-  "라운드숄더",
-  "무릎 굴곡변형",
-  "좌측 다리 정렬",
-  "우측 다리 정렬",
-  "척추 측만 정도",
-  "흉추 커브 정도",
-  "요추 전만 정도",
-  "골반 틀어짐",
-  "골반 돌아감",
-  "골반 경사"
+const REGION_INFO = {
+  neck:{
+    name:"목",
+    muscles:["흉쇄유돌근","사각근","심부 경부 굴곡근군","후두하근군","상부승모근","견갑거근"],
+    tests:"증상과 관련된 목 움직임, 팔 움직임과의 관계, 필요한 범위의 기능 평가",
+    intervention:"허용 범위의 목 움직임 연습·자세 변형·부하 조절을 평가 후 선택"
+  },
+  shoulder:{
+    name:"어깨·견갑대",
+    muscles:["회전근개","삼각근","전거근","승모근","대흉근","소흉근"],
+    tests:"팔 올리기 범위·증상, 필요 시 근력·견갑대 움직임·목과의 관련성 평가",
+    intervention:"허용 범위의 팔 움직임·견갑대 운동·점진적 부하를 평가 후 선택"
+  },
+  thorax:{
+    name:"흉추·흉곽",
+    muscles:["흉추 척추기립근군","승모근","능형근","전거근","늑간근","횡격막"],
+    tests:"과제와 관련된 몸통 회전·팔 움직임·호흡 시 움직임을 필요한 범위에서 확인",
+    intervention:"허용 범위의 몸통 움직임·팔 움직임·편안한 호흡 연습을 평가 후 선택"
+  },
+  trunk:{
+    name:"허리·몸통",
+    muscles:["척추기립근군","다열근","복직근","내·외복사근","복횡근","대둔근"],
+    tests:"증상 관련 몸통 움직임·힙힌지·앉기/서기와 필요한 기능 평가",
+    intervention:"개인 목표에 맞는 몸통·고관절 움직임과 점진적 활동을 평가 후 선택"
+  },
+  hip:{
+    name:"고관절·골반",
+    muscles:["대둔근","중둔근","소둔근","장요근","고관절 내전근군","심부 외회전근군"],
+    tests:"고관절 움직임, 걷기·한발 지지·앉기/서기와 필요한 기능 평가",
+    intervention:"허용 범위의 고관절 움직임·지지 운동·점진적 부하를 평가 후 선택"
+  },
+  knee:{
+    name:"무릎·하지",
+    muscles:["대퇴사두근","햄스트링","대둔근","중둔근","비복근","가자미근"],
+    tests:"무릎 굽힘/폄, 과제 수행, 필요 시 고관절·발목 움직임과 근력 평가",
+    intervention:"허용 범위의 무릎 움직임·앉기/서기·스텝 과제·부하 조절을 평가 후 선택"
+  },
+  foot:{
+    name:"발목·발",
+    muscles:["비복근","가자미근","전경골근","후경골근","비골근군","발 내재근군"],
+    tests:"발목 움직임, 걷기·발뒤꿈치 들기·균형 과제와 필요한 기능 평가",
+    intervention:"허용 범위의 발목 움직임·균형·발뒤꿈치 들기·점진적 부하를 평가 후 선택"
+  },
+  general:{
+    name:"선택한 과제의 관련 영역",
+    muscles:[],
+    tests:"목표 과제에서 범위·수행·안정감·증상을 먼저 기록",
+    intervention:"회원 목표에 맞는 과제 연습과 활동량 조절을 평가 후 선택"
+  }
+};
+
+const FINDING_INFO = [
+  ["머리의 이동","neck","머리 위치 소견만으로 경부 근육의 긴장·약화를 판단하지 않습니다."],
+  ["어깨 높이 차이","shoulder","높이 차이만으로 어느 근육이 짧거나 약한지, 늑골 상태를 판단하지 않습니다."],
+  ["라운드숄더","shoulder","서기 형태와 실제 팔 움직임·근력·증상은 구분해 확인합니다."],
+  ["무릎 굴곡변형","knee","서기에서 굽혀 보이는 소견과 실제 신전 제한·고정 변형은 다릅니다."],
+  ["좌측 다리 정렬","knee","좌측 서기 형태와 실제 과제의 움직임·증상은 따로 확인합니다."],
+  ["우측 다리 정렬","knee","우측 서기 형태와 실제 과제의 움직임·증상은 따로 확인합니다."],
+  ["척추 측만 정도","thorax","촬영 소견만으로 구조적 측만을 진단하거나 교정 방향을 정하지 않습니다."],
+  ["흉추 커브 정도","thorax","커브 증가·감소만으로 가동성·근육 상태·통증 원인을 판단하지 않습니다."],
+  ["요추 전만 정도","trunk","전만 형태만으로 복부 근력·복압·통증 원인을 판단하지 않습니다."],
+  ["골반 틀어짐","hip","결과지 명칭을 보존합니다. 뼈가 어긋났다는 진단으로 사용하지 않습니다."],
+  ["골반 돌아감","hip","서기 회전 소견과 실제 움직임·증상 관련성은 구분합니다."],
+  ["골반 경사","hip","전방·후방 경사만으로 근육 긴장·약화·압박을 판단하지 않습니다."]
+].map(([name,region,note])=>({name,region,note}));
+
+const H_SPECS = [
+  spec("title","가설 제목"),
+  spec("statement","확인할 가설 문장","textarea"),
+  spec("basis","입력 근거·정보 출처","textarea"),
+  spec("muscles","연관해서 확인할 근육·영역","textarea"),
+  spec("test","오늘 확인할 평가","textarea"),
+  spec("prediction","조건을 바꾸면 무엇이 달라질지 — 예상","textarea"),
+  spec("change","한 번에 바꿀 조건","textarea"),
+  spec("intervention","평가 후 선택 가능한 개입 후보","textarea"),
+  spec("action","실제로 진행한 평가·개입·양","textarea"),
+  spec("facts","직접 확인한 사실·증상·수행","textarea"),
+  spec("before","전 — 수행·범위·증상","textarea"),
+  spec("after","후 — 수행·범위·증상","textarea"),
+  spec("beforePain","같은 과제의 전 NRS — 미측정은 빈칸","number"),
+  spec("afterPain","같은 과제의 후 NRS — 미측정은 빈칸","number"),
+  spec("comparison","전후 비교 조건","select",[
+    "미확인","같음","다름","불명확"
+  ]),
+  spec("difference","조건 차이·해석 한계"),
+  spec("timing","재평가 시점","select",[
+    "미확인","조건 변경 직후","개입 직후","전체 세션 후",
+    "그날 밤","다음 날","기타"
+  ]),
+  spec("response","관찰된 반응","select",[
+    "미확인","개선 관찰","일부 개선 관찰","변화 확인하지 못함",
+    "악화 관찰","혼합 반응","평가하지 않음"
+  ]),
+  spec("nextDay","그날 밤·다음 날 반응","select",[
+    "미확인","허용 가능한 반응","악화·지속 반응","기타"
+  ]),
+  spec("judgment","담당자 가설 판단","select",[
+    "미정","지지 증가","근거 약함","수정","확인 불가"
+  ]),
+  spec("next","남은 질문·다음 행동","textarea")
 ];
 
-const CATEGORY = {
-  "머리의 이동": "상부",
-  "어깨 높이 차이": "상부",
-  "라운드숄더": "상부",
+let records = [];
+let current = null;
+let dirty = false;
+let storageHealthy = true;
+let unlocked = false;
+let lastActivity = Date.now();
 
-  "척추 측만 정도": "중간",
-  "흉추 커브 정도": "중간",
-  "요추 전만 정도": "중간",
-  "골반 틀어짐": "중간",
-  "골반 돌아감": "중간",
-  "골반 경사": "중간",
-
-  "무릎 굴곡변형": "하지",
-  "좌측 다리 정렬": "하지",
-  "우측 다리 정렬": "하지"
-};
-
-const SYMPTOM_PRIORITY = {
-  "목 통증": ["상부","중간","하지"],
-  "어깨 통증": ["상부","중간","하지"],
-  "등/날개뼈 통증": ["상부","중간","하지"],
-
-  "허리 통증": ["중간","하지","상부"],
-  "골반 불균형 느낌": ["중간","하지","상부"],
-
-  "고관절 통증": ["하지","중간","상부"],
-  "무릎 통증": ["하지","중간","상부"],
-  "발목/발 통증": ["하지","중간","상부"],
-
-  "자세교정/체형교정": ["상부","중간","하지"],
-  "운동 퍼포먼스 개선": ["하지","중간","상부"],
-  "통증 없음": ["상부","중간","하지"]
-};
-
-const SYMPTOM_ITEM_BONUS = {
-  "목 통증": [
-    "머리의 이동",
-    "어깨 높이 차이",
-    "라운드숄더",
-    "흉추 커브 정도",
-    "척추 측만 정도"
-  ],
-
-  "어깨 통증": [
-    "라운드숄더",
-    "어깨 높이 차이",
-    "흉추 커브 정도",
-    "머리의 이동",
-    "척추 측만 정도"
-  ],
-
-  "등/날개뼈 통증": [
-    "라운드숄더",
-    "흉추 커브 정도",
-    "척추 측만 정도",
-    "어깨 높이 차이"
-  ],
-
-  "허리 통증": [
-    "요추 전만 정도",
-    "골반 경사",
-    "골반 돌아감",
-    "골반 틀어짐",
-    "척추 측만 정도",
-    "흉추 커브 정도"
-  ],
-
-  "골반 불균형 느낌": [
-    "골반 틀어짐",
-    "골반 돌아감",
-    "골반 경사",
-    "척추 측만 정도",
-    "좌측 다리 정렬",
-    "우측 다리 정렬"
-  ],
-
-  "고관절 통증": [
-    "골반 돌아감",
-    "골반 틀어짐",
-    "좌측 다리 정렬",
-    "우측 다리 정렬",
-    "골반 경사"
-  ],
-
-  "무릎 통증": [
-    "좌측 다리 정렬",
-    "우측 다리 정렬",
-    "무릎 굴곡변형",
-    "골반 돌아감",
-    "골반 틀어짐"
-  ],
-
-  "발목/발 통증": [
-    "좌측 다리 정렬",
-    "우측 다리 정렬",
-    "무릎 굴곡변형",
-    "골반 돌아감"
-  ],
-
-  "자세교정/체형교정": ITEMS,
-
-  "운동 퍼포먼스 개선": [
-    "좌측 다리 정렬",
-    "우측 다리 정렬",
-    "골반 돌아감",
-    "흉추 커브 정도",
-    "라운드숄더"
-  ],
-
-  "통증 없음": ITEMS
-};
-
-function info(problem, compensation, tests, interventions, why){
-  return {problem, compensation, tests, interventions, why};
+function notify(message,error=false){
+  $("status").textContent = message;
+  $("status").style.color = error ? "#b91c1c" : "#334155";
 }
-
-const ITEM_INFO = {
-  "머리의 이동": info(
-    "머리 전방 이동과 경추-흉추 정렬 문제",
-    "후두하근, SCM, 사각근 과긴장과 목으로 버티는 패턴이 동반될 수 있습니다.",
-    ["경추 회전", "chin tuck", "호흡 시 목 보상", "어깨 굴곡 시 목 긴장"],
-    ["후두하근 이완", "SCM/사각근 긴장 조절", "deep neck flexor activation", "흉곽 호흡"],
-    "머리의 이동은 목 통증, 어깨 긴장, 라운드숄더와 함께 나타나는 경우가 많습니다."
-  ),
-
-  "어깨 높이 차이": info(
-    "좌우 견갑대 높이 및 목-어깨 압축 비대칭",
-    "한쪽 상부승모근/견갑거근 과긴장, 1번 늑골 상승, 흉추 측굴/회전 보상이 있을 수 있습니다.",
-    ["목 회전 좌우 비교", "팔 올릴 때 한쪽 어깨 으쓱", "호흡 시 어깨 상승", "견갑골 높이 비교"],
-    ["상부승모근/견갑거근 조절", "사각근/SCM 확인", "후방 늑골 호흡", "wall slide"],
-    "어깨 높이 차이는 견갑대, 목, 흉곽 비대칭을 반영할 수 있습니다."
-  ),
-
-  "라운드숄더": info(
-    "견갑대 전방 말림과 흉곽 위 견갑골 안착 문제",
-    "소흉근/대흉근 긴장, 전거근/하부승모근 조절 저하, 팔 올릴 때 어깨 으쓱 또는 갈비뼈 들림이 나타날 수 있습니다.",
-    ["어깨 굴곡", "wall slide", "견갑골 내측연 관찰", "흉추 회전"],
-    ["소흉근/대흉근 이완", "후방 늑골 호흡", "serratus wall slide", "전거근/하부승모근 활성화"],
-    "라운드숄더가 심하면 팔 올리기, 목/어깨 긴장, 흉곽 움직임 제한과 연결되기 쉽습니다."
-  ),
-
-  "무릎 굴곡변형": info(
-    "무릎 완전 신전 또는 TKE 문제",
-    "햄스트링/종아리 긴장, 대퇴사두근 조절 저하, 보행 시 무릎 굽힘 유지가 나타날 수 있습니다.",
-    ["무릎 완전 신전", "TKE", "보행 terminal knee extension", "스텝다운"],
-    ["TKE", "대퇴사두근 활성", "종아리/햄스트링 상태 확인", "보행 말기 신전 재교육"],
-    "무릎이 완전히 펴지지 않으면 하지 정렬과 보행 패턴 전체에 영향을 줄 수 있습니다."
-  ),
-
-  "좌측 다리 정렬": info(
-    "좌측 고관절-무릎-발 정렬 문제",
-    "좌측 무릎 valgus/varus, 발 아치 붕괴, 고관절 회전 조절 저하, 골반 회전 보상이 연결될 수 있습니다.",
-    ["좌측 스텝다운", "좌측 싱글레그 스쿼트", "좌측 발목 배측굴곡", "좌측 한발서기"],
-    ["좌측 short foot", "발목 가동성", "중둔근/대둔근 활성", "step-down knee tracking"],
-    "좌측 하지 정렬이 나쁘면 무릎, 고관절, 골반 회전 보상으로 이어질 수 있습니다."
-  ),
-
-  "우측 다리 정렬": info(
-    "우측 고관절-무릎-발 정렬 문제",
-    "우측 무릎 valgus/varus, 발 아치 붕괴, 고관절 회전 조절 저하, 골반 회전 보상이 연결될 수 있습니다.",
-    ["우측 스텝다운", "우측 싱글레그 스쿼트", "우측 발목 배측굴곡", "우측 한발서기"],
-    ["우측 short foot", "발목 가동성", "중둔근/대둔근 활성", "step-down knee tracking"],
-    "우측 하지 정렬이 나쁘면 무릎, 고관절, 골반 회전 보상으로 이어질 수 있습니다."
-  ),
-
-  "척추 측만 정도": info(
-    "척추/흉곽의 좌우 비대칭 또는 기능적 편위 가능성",
-    "흉곽 회전, 골반 회전, 한쪽 늑골 확장 제한, 어깨/골반 높이 보상이 나타날 수 있습니다.",
-    ["전방 굴곡", "흉추 회전 좌우 비교", "호흡 좌우차", "골반 높이 비교"],
-    ["비대칭 호흡", "side plank variation", "bird dog", "Pallof press"],
-    "측만 소견은 척추만이 아니라 흉곽, 골반, 하지 정렬과 같이 봐야 합니다."
-  ),
-
-  "흉추 커브 정도": info(
-    "흉추 커브의 증가 또는 감소에 따른 흉곽-척추 움직임 전략",
-    "흉추 커브가 증가하면 등 말림, 견갑골 전방 경사, 목/어깨 긴장이 동반될 수 있고, 감소하면 흉추 신전 고정, 갈비뼈 들림, 요추 과신전 보상이 나타날 수 있습니다.",
-    ["흉추 회전", "open book", "어깨 굴곡 시 갈비뼈 보상", "wall slide", "호흡 시 후방 늑골 확장"],
-    ["후방 늑골 호흡", "open book", "quadruped thoracic rotation", "wall slide", "흉곽-골반 정렬 재교육"],
-    "흉추 커브는 단순히 증가/감소만 보는 것이 아니라 어깨, 목, 요추, 골반 보상과 함께 해석해야 합니다."
-  ),
-
-  "요추 전만 정도": info(
-    "요추 전만의 증가 또는 감소에 따른 허리-골반 조절 문제",
-    "전만이 과하면 허리 과신전/복압 저하, 전만이 감소하면 골반 말림/힙힌지 제한이 동반될 수 있습니다.",
-    ["pelvic tilt", "dead bug", "hip hinge", "cat-camel"],
-    ["90/90 breathing", "dead bug", "pelvic clock", "hip hinge 재교육"],
-    "요추 전만 정도는 허리 통증과 골반 움직임 전략을 결정하는 중요한 단서입니다."
-  ),
-
-  "골반 틀어짐": info(
-    "좌우 골반 높이 차이와 체중분배 비대칭",
-    "척추 측굴 보상, 한쪽 하지 체중지지 증가, 발 아치/무릎 정렬 변화가 나타날 수 있습니다.",
-    ["골반 높이", "한발서기", "체중분배", "보행"],
-    ["체중분배 훈련", "한발서기 안정화", "발-무릎-고관절 정렬", "side plank variation"],
-    "골반 틀어짐은 척추와 하지의 좌우 부하 차이와 연결될 수 있습니다."
-  ),
-
-  "골반 돌아감": info(
-    "수평면상 골반 회전 조절 문제",
-    "고관절 회전 비대칭, 하지 정렬 변화, 흉곽 반대 회전 보상이 나타날 수 있습니다.",
-    ["런지에서 골반 회전", "보행", "한발서기", "고관절 IR/ER"],
-    ["split squat pelvis square", "Pallof press", "흉곽-골반 분리 운동", "고관절 회전 가동성"],
-    "골반 회전은 하지 정렬과 흉곽 회전 보상에 영향을 줄 수 있습니다."
-  ),
-
-  "골반 경사": info(
-    "골반 전방 경사 또는 후방 경사에 따른 허리-고관절 조절 문제",
-    "골반 전방 경사는 요추 과신전, 고관절 앞쪽 압박, 복압 조절 저하와 연결될 수 있고, 골반 후방 경사는 허리 말림, 햄스트링 우세, hip hinge 제한과 연결될 수 있습니다.",
-    ["pelvic tilt", "cat-camel", "hip hinge", "dead bug", "straight leg raise"],
-    ["90/90 breathing", "pelvic clock", "dead bug", "cat-camel", "hip hinge dowel drill"],
-    "골반 경사는 전방/후방 방향에 따라 개입 전략이 달라지므로 요추 전만 정도, 고관절 접힘, 하지 정렬과 함께 봐야 합니다."
-  )
-};
-
-let currentRecordId = null;
-let latestRecommendations = [];
-let latestPatterns = [];
-
-function unlockApp(){
-  const v = document.getElementById("passwordInput").value;
-
-  if(v === APP_PASSWORD){
-    document.getElementById("lock").style.display = "none";
-    sessionStorage.setItem("motiUnlocked", "yes");
-  } else {
-    document.getElementById("lockMsg").textContent = "비밀번호가 맞지 않습니다.";
+function blankInputs(){
+  const out = {};
+  ALL_SPECS.forEach(s=>{
+    out[s.id] = s.type === "select" ? s.options[0] : "";
+  });
+  out.date = today();
+  out.visit = "1";
+  return out;
+}
+function blankRecord(){
+  return {
+    version:VERSION,id:uid(),memberId:uid(),
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),
+    inputs:blankInputs(),
+    findings:Object.fromEntries(FINDING_INFO.map(f=>[f.name,"미입력"])),
+    flags:{emergency:[],concern:[]},
+    hypotheses:[],archives:[],legacy:null,
+    analysis:{generatedAt:"",stale:false}
+  };
+}
+function selectedOptions(options,value){
+  return options.map(v=>
+    `<option value="${esc(v)}"${v===value?" selected":""}>${esc(v)}</option>`
+  ).join("");
+}
+function control(s,value,attrs){
+  const common = `${attrs} autocomplete="off"`;
+  if(s.type === "textarea"){
+    return `<textarea ${common} placeholder="${esc(s.placeholder)}">${esc(value)}</textarea>`;
   }
-}
-
-function showTab(tabId, btn){
-  document.querySelectorAll(".tabpage").forEach(page=>{
-    page.classList.remove("active");
-  });
-
-  document.querySelectorAll(".tabbtn").forEach(b=>{
-    b.classList.remove("active");
-  });
-
-  document.getElementById(tabId).classList.add("active");
-
-  if(btn){
-    btn.classList.add("active");
+  if(s.type === "select"){
+    return `<select ${common}>${selectedOptions(s.options,value)}</select>`;
   }
-
-  window.scrollTo({top:0, behavior:"smooth"});
-}
-
-function showTabById(tabId){
-  const buttons = document.querySelectorAll(".tabbtn");
-  let targetButton = null;
-
-  buttons.forEach(btn=>{
-    const onclick = btn.getAttribute("onclick") || "";
-    if(onclick.includes(tabId)){
-      targetButton = btn;
-    }
-  });
-
-  showTab(tabId, targetButton);
-}
-
-function init(){
-  if(sessionStorage.getItem("motiUnlocked") === "yes"){
-    document.getElementById("lock").style.display = "none";
+  let range = "";
+  if(s.type === "number"){
+    if(s.id.toLowerCase().includes("pain")) range=' min="0" max="10" step="1"';
+    else if(s.id==="age") range=' min="1" max="120" step="1"';
+    else if(s.id==="visit") range=' min="1" step="1"';
   }
-
-  fillSelect("primarySymptom", SYMPTOMS, false);
-  fillSelect("secondarySymptom", SYMPTOMS, true);
-
-  makeChecks("severeItems", "severe", ITEMS);
-  makeChecks("warningItems", "warning", ITEMS);
-  makeChecks("normalItems", "normal", ITEMS);
-
-  renderMemberList();
-  renderSessionRecordArea();
+  return `<input type="${s.type}" ${common}${range}
+    value="${esc(value)}" placeholder="${esc(s.placeholder)}">`;
 }
-
-function fillSelect(id, arr, none){
-  const s = document.getElementById(id);
-  if(!s) return;
-
-  s.innerHTML = none ? '<option value="">선택 안 함</option>' : "";
-  arr.forEach(x=>{
-    s.innerHTML += `<option>${x}</option>`;
-  });
-}
-
-function makeChecks(id, name, arr){
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  el.innerHTML = arr.map(x=>`
-    <label class="check">
-      <input type="checkbox" name="${name}" value="${x}">${x}
+function renderFields(container,specs){
+  $(container).innerHTML = specs.map(s=>`
+    <label class="field">
+      <span>${esc(s.label)}</span>
+      ${control(s,current.inputs[s.id],`data-input="${esc(s.id)}"`)}
     </label>
   `).join("");
 }
-
-function checked(name){
-  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
-}
-
-function setChecked(name, vals){
-  document.querySelectorAll(`input[name="${name}"]`).forEach(x=>{
-    x.checked = (vals || []).includes(x.value);
-  });
-}
-
-function val(id){
-  const el = document.getElementById(id);
-  return el ? el.value : "";
-}
-
-function setVal(id, v){
-  const el = document.getElementById(id);
-  if(el) el.value = v || "";
-}
-
-function sevOf(item, severe, warning, normal){
-  if(severe.includes(item)) return "심각";
-  if(warning.includes(item)) return "경계";
-  if(normal.includes(item)) return "유지";
-  return "미입력";
-}
-
-function migrateOldItemName(item){
-  const map = {
-    "흉추 커브 감소": "흉추 커브 정도",
-    "골반 후방 경사": "골반 경사"
-  };
-
-  return map[item] || item;
-}
-
-function migrateOldItemArray(arr){
-  return (arr || []).map(migrateOldItemName);
-}
-
-function sideScoreBonus(item, symptom, side, weight){
-  if(!symptom || !side) return 0;
-
-  let bonus = 0;
-
-  const lowerLimbSymptom =
-    symptom.includes("무릎") ||
-    symptom.includes("고관절") ||
-    symptom.includes("발목") ||
-    symptom.includes("발");
-
-  const upperSymptom =
-    symptom.includes("어깨") ||
-    symptom.includes("목") ||
-    symptom.includes("등") ||
-    symptom.includes("날개뼈");
-
-  const trunkSymptom =
-    symptom.includes("허리") ||
-    symptom.includes("골반");
-
-  if(lowerLimbSymptom){
-    if(side === "좌측"){
-      if(item === "좌측 다리 정렬") bonus += weight;
-      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
-      if(item === "무릎 굴곡변형") bonus += weight * 0.4;
-    }
-
-    if(side === "우측"){
-      if(item === "우측 다리 정렬") bonus += weight;
-      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
-      if(item === "무릎 굴곡변형") bonus += weight * 0.4;
-    }
-
-    if(side === "양측"){
-      if(item === "좌측 다리 정렬" || item === "우측 다리 정렬") bonus += weight * 0.8;
-      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.5;
-      if(item === "무릎 굴곡변형") bonus += weight * 0.5;
-    }
-  }
-
-  if(upperSymptom){
-    if(side === "좌측" || side === "우측"){
-      if(item === "어깨 높이 차이") bonus += weight;
-      if(item === "라운드숄더") bonus += weight * 0.5;
-      if(item === "흉추 커브 정도") bonus += weight * 0.5;
-      if(item === "척추 측만 정도") bonus += weight * 0.4;
-      if(item === "머리의 이동") bonus += weight * 0.4;
-    }
-
-    if(side === "양측"){
-      if(item === "라운드숄더") bonus += weight * 0.8;
-      if(item === "흉추 커브 정도") bonus += weight * 0.7;
-      if(item === "머리의 이동") bonus += weight * 0.5;
-    }
-
-    if(side === "중앙"){
-      if(item === "머리의 이동") bonus += weight * 0.7;
-      if(item === "흉추 커브 정도") bonus += weight * 0.5;
-      if(item === "라운드숄더") bonus += weight * 0.4;
-    }
-  }
-
-  if(trunkSymptom){
-    if(side === "좌측" || side === "우측"){
-      if(item === "골반 틀어짐") bonus += weight;
-      if(item === "골반 돌아감") bonus += weight;
-      if(item === "척추 측만 정도") bonus += weight * 0.5;
-      if(item === "요추 전만 정도") bonus += weight * 0.4;
-    }
-
-    if(side === "중앙"){
-      if(item === "요추 전만 정도") bonus += weight;
-      if(item === "골반 경사") bonus += weight * 0.7;
-      if(item === "흉추 커브 정도") bonus += weight * 0.4;
-    }
-
-    if(side === "양측"){
-      if(item === "골반 틀어짐" || item === "골반 돌아감") bonus += weight * 0.8;
-      if(item === "요추 전만 정도") bonus += weight * 0.6;
-    }
-  }
-
-  return bonus;
-}
-
-function adjustCurveDirectionScores(scores){
-  const thoracicCurveDir = val("thoracicCurveDir");
-  const pelvicTiltDir = val("pelvicTiltDir");
-  const lumbarCurveDir = val("lumbarCurveDir");
-
-  if(thoracicCurveDir){
-    scores["흉추 커브 정도"] = (scores["흉추 커브 정도"] || 0) + 1.5;
-
-    if(thoracicCurveDir === "흉추 커브 증가"){
-      scores["라운드숄더"] = (scores["라운드숄더"] || 0) + 0.7;
-      scores["머리의 이동"] = (scores["머리의 이동"] || 0) + 0.5;
-      scores["어깨 높이 차이"] = (scores["어깨 높이 차이"] || 0) + 0.4;
-    }
-
-    if(thoracicCurveDir === "흉추 커브 감소"){
-      scores["요추 전만 정도"] = (scores["요추 전만 정도"] || 0) + 0.7;
-      scores["골반 경사"] = (scores["골반 경사"] || 0) + 0.5;
-      scores["라운드숄더"] = (scores["라운드숄더"] || 0) + 0.3;
-    }
-  }
-
-  if(pelvicTiltDir){
-    scores["골반 경사"] = (scores["골반 경사"] || 0) + 1.5;
-
-    if(pelvicTiltDir === "골반 전방 경사"){
-      scores["요추 전만 정도"] = (scores["요추 전만 정도"] || 0) + 1.0;
-      scores["골반 돌아감"] = (scores["골반 돌아감"] || 0) + 0.3;
-    }
-
-    if(pelvicTiltDir === "골반 후방 경사"){
-      scores["요추 전만 정도"] = (scores["요추 전만 정도"] || 0) + 0.8;
-      scores["무릎 굴곡변형"] = (scores["무릎 굴곡변형"] || 0) + 0.5;
-      scores["골반 돌아감"] = (scores["골반 돌아감"] || 0) + 0.3;
-    }
-  }
-
-  if(lumbarCurveDir){
-    scores["요추 전만 정도"] = (scores["요추 전만 정도"] || 0) + 1.2;
-
-    if(lumbarCurveDir === "요추 전만 증가"){
-      scores["골반 경사"] = (scores["골반 경사"] || 0) + 0.8;
-    }
-
-    if(lumbarCurveDir === "요추 전만 감소"){
-      scores["골반 경사"] = (scores["골반 경사"] || 0) + 0.8;
-      scores["무릎 굴곡변형"] = (scores["무릎 굴곡변형"] || 0) + 0.3;
-    }
-  }
-
-  return scores;
-}
-
-function calculateScores(){
-  const primary = val("primarySymptom");
-  const primarySide = val("primarySide");
-  const secondary = val("secondarySymptom");
-  const secondarySide = val("secondarySide");
-
-  const primaryPain = Number(val("primaryPain") || 0);
-  const secondaryPain = Number(val("secondaryPain") || 0);
-
-  const severe = checked("severe");
-  const warning = checked("warning");
-  const normal = checked("normal");
-
-  const scores = {};
-
-  ITEMS.forEach(item=>{
-    let s = 0;
-
-    if(severe.includes(item)) s += 5;
-    else if(warning.includes(item)) s += 3;
-
-    if((SYMPTOM_ITEM_BONUS[primary] || []).includes(item)) s += 3;
-
-    if(secondary && (SYMPTOM_ITEM_BONUS[secondary] || []).includes(item)) s += 1.5;
-
-    const cats = SYMPTOM_PRIORITY[primary] || [];
-    const idx = cats.indexOf(CATEGORY[item]);
-
-    if(idx === 0) s += 2;
-    else if(idx === 1) s += 1;
-
-    if(primaryPain >= 7 && (SYMPTOM_ITEM_BONUS[primary] || []).includes(item)) s += 1.5;
-    if(secondaryPain >= 7 && secondary && (SYMPTOM_ITEM_BONUS[secondary] || []).includes(item)) s += 0.8;
-
-    s += sideScoreBonus(item, primary, primarySide, 2.5);
-    s += sideScoreBonus(item, secondary, secondarySide, 1.5);
-
-    if(val("shoulderSide") && item === "어깨 높이 차이") s += 1.5;
-
-    if(val("legSide").includes("좌측") && item === "좌측 다리 정렬") s += 2;
-    if(val("legSide").includes("우측") && item === "우측 다리 정렬") s += 2;
-    if(val("legSide").includes("양측") && (item === "좌측 다리 정렬" || item === "우측 다리 정렬")) s += 1.5;
-
-    if(
-      (val("pelvisRotation") || val("thoraxRotation") || val("thoracicLimit")) &&
-      ["골반 돌아감","척추 측만 정도","흉추 커브 정도"].includes(item)
-    ){
-      s += 1;
-    }
-
-    scores[item] = s;
-  });
-
-  adjustCurveDirectionScores(scores);
-
-  return {scores, severe, warning, normal};
-}
-
-function generateRecommendations(){
-  if(!val("name").trim()){
-    alert("이름을 입력해주세요.");
-    return;
-  }
-
-  const {scores, severe, warning, normal} = calculateScores();
-
-  latestRecommendations = Object.entries(scores)
-    .sort((a,b)=>b[1]-a[1])
-    .filter(x=>x[1] > 2)
-    .slice(0,3)
-    .map(([item, score], i)=>({
-      rank: i + 1,
-      item,
-      score,
-      category: CATEGORY[item],
-      severity: sevOf(item, severe, warning, normal),
-      ...ITEM_INFO[item]
-    }));
-
-  latestPatterns = analyzePatterns();
-
-  renderSummary();
-  renderPatterns();
-  renderRecommendations();
-  renderSessionRecordArea();
-}
-
-function pattern(title, meaning, tests, interventions){
-  return {title, meaning, tests, interventions};
-}
-
-function analyzePatterns(){
-  const p = [];
-
-  const Lk = val("leftKneeDir");
-  const La = val("leftArch");
-  const Lf = val("leftFootDir");
-  const Lir = val("leftHipIR");
-
-  const Rk = val("rightKneeDir");
-  const Ra = val("rightArch");
-  const Rf = val("rightFootDir");
-  const Rir = val("rightHipIR");
-
-  if(Lk === "안쪽 붕괴" || La === "무너짐"){
-    p.push(pattern(
-      "좌측 하지 내회전/valgus 체인",
-      "좌측 발 아치 붕괴 또는 무릎 안쪽 붕괴가 보이면 발-경골-대퇴골 체인의 회전 조절 문제가 의심됩니다.",
-      "좌측 스텝다운, 발목 배측굴곡, 고관절 IR/ER",
-      "좌측 short foot, 중둔근/대둔근 활성, step-down knee tracking"
-    ));
-  }
-
-  if(Rk === "안쪽 붕괴" || Ra === "무너짐"){
-    p.push(pattern(
-      "우측 하지 내회전/valgus 체인",
-      "우측 발 아치 붕괴 또는 무릎 안쪽 붕괴가 보이면 발-경골-대퇴골 체인의 회전 조절 문제가 의심됩니다.",
-      "우측 스텝다운, 발목 배측굴곡, 고관절 IR/ER",
-      "우측 short foot, 중둔근/대둔근 활성, step-down knee tracking"
-    ));
-  }
-
-  if((Lf === "외회전" && Lir === "제한") || (Rf === "외회전" && Rir === "제한")){
-    p.push(pattern(
-      "발끝 외회전 + 고관절 IR 제한 패턴",
-      "발끝을 바깥으로 열어 고관절 내회전 부족을 보상할 수 있습니다. 무릎만 정면으로 강제하지 말고 고관절/발목을 같이 봐야 합니다.",
-      "prone hip IR/ER, 보행 foot progression, 스텝다운",
-      "고관절 IR 가동성, 발목 배측굴곡, foot tripod"
-    ));
-  }
-
-  if(val("pelvisRotation") && val("thoraxRotation")){
-    p.push(pattern(
-      "골반-흉곽 회전 보상 패턴",
-      "골반과 흉곽이 서로 다른 방향으로 고정되면 척추 편위나 팔/보행 회전 보상으로 이어질 수 있습니다.",
-      "half-kneeling thoracic rotation, 런지 골반 정면 유지, 보행",
-      "비대칭 호흡, 흉곽-골반 분리, Pallof press"
-    ));
-  }
-
-  if(val("shoulderSide") && val("thoracicLimit")){
-    p.push(pattern(
-      "어깨 높이 + 흉추/목 보상 패턴",
-      "어깨 높이 차이와 흉추 회전 제한이 같이 있으면 상부승모근/견갑거근/사각근, 1번 늑골, 흉곽 회전 보상을 확인해야 합니다.",
-      "경추 회전, 팔 올리기, 흉추 회전, 호흡 시 어깨 상승",
-      "상부승모근/견갑거근 조절, 후방 늑골 호흡, wall slide"
-    ));
-  }
-
-  if(val("thoracicCurveDir") === "흉추 커브 증가"){
-    p.push(pattern(
-      "흉추 커브 증가 패턴",
-      "흉추 커브 증가가 있으면 등 말림, 라운드숄더, 머리 전방 이동, 견갑골 전방 경사 보상이 함께 나타날 수 있습니다.",
-      "어깨 굴곡, wall slide, 흉추 신전/회전, 호흡 시 후방 늑골 확장",
-      "후방 늑골 호흡, 흉추 회전, 소흉근/대흉근 이완, 전거근/하부승모근 활성"
-    ));
-  }
-
-  if(val("thoracicCurveDir") === "흉추 커브 감소"){
-    p.push(pattern(
-      "흉추 커브 감소/신전 고정 패턴",
-      "흉추 커브 감소가 있으면 흉추가 신전된 상태로 뻣뻣해지고, 팔을 올릴 때 갈비뼈 들림이나 요추 과신전으로 보상할 수 있습니다.",
-      "wall slide, overhead reach, open book, 호흡 시 갈비뼈 움직임",
-      "후방 늑골 호흡, 흉곽 내리기, open book, quadruped thoracic rotation"
-    ));
-  }
-
-  if(val("pelvicTiltDir") === "골반 전방 경사"){
-    p.push(pattern(
-      "골반 전방 경사 + 요추 전만 증가 가능 패턴",
-      "골반 전방 경사는 요추 전만 증가, 복압 조절 저하, 고관절 앞쪽 압박, 허리 과신전 보상과 연결될 수 있습니다.",
-      "pelvic tilt, dead bug, hip hinge, 고관절 신전/굴곡 확인",
-      "90/90 breathing, dead bug, posterior pelvic tilt control, hip flexor tone 조절"
-    ));
-  }
-
-  if(val("pelvicTiltDir") === "골반 후방 경사"){
-    p.push(pattern(
-      "골반 후방 경사 + 허리 말림 패턴",
-      "골반 후방 경사는 요추 전만 감소, 햄스트링 우세, hip hinge 제한, 허리 말림 보상과 연결될 수 있습니다.",
-      "cat-camel, pelvic tilt, hip hinge, straight leg raise",
-      "pelvic clock, cat-camel, hip hinge dowel drill, 햄스트링 긴장 조절"
-    ));
-  }
-
-  if(val("lumbarCurveDir") === "요추 전만 증가" && val("pelvicTiltDir") === "골반 전방 경사"){
-    p.push(pattern(
-      "요추 전만 증가 + 골반 전방 경사 연결 패턴",
-      "요추 전만 증가와 골반 전방 경사가 같이 보이면 허리 과신전 전략, 복압 저하, 고관절 앞쪽 압박을 함께 확인하는 것이 좋습니다.",
-      "dead bug, hip hinge, overhead reach, 고관절 앞쪽 불편감 확인",
-      "90/90 breathing, dead bug, rib down control, glute bridge neutral"
-    ));
-  }
-
-  if(val("lumbarCurveDir") === "요추 전만 감소" && val("pelvicTiltDir") === "골반 후방 경사"){
-    p.push(pattern(
-      "요추 전만 감소 + 골반 후방 경사 연결 패턴",
-      "요추 전만 감소와 골반 후방 경사가 같이 보이면 허리 말림, 햄스트링 우세, 고관절 접힘 부족을 확인하는 것이 좋습니다.",
-      "hip hinge, cat-camel, pelvic tilt, SLR",
-      "pelvic clock, cat-camel, hip hinge 재교육, 햄스트링 긴장 조절"
-    ));
-  }
-
-  return p;
-}
-
-function sideMismatchInsight(){
-  const primarySymptom = val("primarySymptom");
-  const primarySide = val("primarySide");
-  const secondarySymptom = val("secondarySymptom");
-  const secondarySide = val("secondarySide");
-
-  const severe = checked("severe");
-  const warning = checked("warning");
-  const problemItems = [...severe, ...warning].map(migrateOldItemName);
-
-  const notes = [];
-
-  function checkLowerLimb(symptom, side, label){
-    if(!symptom) return;
-
-    const isLower =
-      symptom.includes("무릎") ||
-      symptom.includes("고관절") ||
-      symptom.includes("발목") ||
-      symptom.includes("발");
-
-    if(!isLower) return;
-
-    if(side === "좌측" && problemItems.includes("우측 다리 정렬")){
-      notes.push(`${label}은 좌측 하지 쪽 증상이지만, 결과지에서는 우측 다리 정렬 문제가 확인됩니다. 좌측 통증 부위만 보지 말고 우측 지지 안정성, 우측 발 아치, 우측 고관절 회전 조절을 함께 확인하는 것이 좋습니다.`);
-    }
-
-    if(side === "우측" && problemItems.includes("좌측 다리 정렬")){
-      notes.push(`${label}은 우측 하지 쪽 증상이지만, 결과지에서는 좌측 다리 정렬 문제가 확인됩니다. 우측 통증 부위만 보지 말고 좌측 지지 안정성, 좌측 발 아치, 좌측 고관절 회전 조절을 함께 확인하는 것이 좋습니다.`);
-    }
-
-    if(side === "좌측" && problemItems.includes("좌측 다리 정렬")){
-      notes.push(`${label}의 좌측 증상과 좌측 다리 정렬 문제가 같은 쪽에서 확인됩니다. 좌측 스텝다운, 좌측 한발서기, 좌측 발 아치 유지 여부를 우선 확인하세요.`);
-    }
-
-    if(side === "우측" && problemItems.includes("우측 다리 정렬")){
-      notes.push(`${label}의 우측 증상과 우측 다리 정렬 문제가 같은 쪽에서 확인됩니다. 우측 스텝다운, 우측 한발서기, 우측 발 아치 유지 여부를 우선 확인하세요.`);
-    }
-  }
-
-  checkLowerLimb(primarySymptom, primarySide, "1순위 증상");
-  checkLowerLimb(secondarySymptom, secondarySide, "2순위 증상");
-
-  if((primarySymptom.includes("어깨") || primarySymptom.includes("목")) && (primarySide === "좌측" || primarySide === "우측")){
-    if(problemItems.includes("어깨 높이 차이")){
-      notes.push(`${primarySide} 목/어깨 증상과 어깨 높이 차이가 함께 보입니다. 증상 부위만 보기보다 좌우 견갑대 높이, 상부승모근/견갑거근 보상, 흉곽 회전 차이를 같이 확인하세요.`);
-    }
-  }
-
-  if(primarySymptom.includes("허리") && (primarySide === "좌측" || primarySide === "우측")){
-    if(problemItems.includes("골반 틀어짐") || problemItems.includes("골반 돌아감") || problemItems.includes("골반 경사")){
-      notes.push(`${primarySide} 허리 증상과 골반 비대칭/경사 소견이 함께 보입니다. 국소 허리 문제만 보기보다 골반 회전, 골반 경사, 체중분배, 한발서기 안정성을 같이 확인하세요.`);
-    }
-  }
-
-  return notes;
-}
-
-function curveDirectionInsight(){
-  const notes = [];
-
-  const thoracic = val("thoracicCurveDir");
-  const pelvic = val("pelvicTiltDir");
-  const lumbar = val("lumbarCurveDir");
-
-  if(thoracic === "흉추 커브 증가"){
-    notes.push("흉추 커브 증가가 선택되었습니다. 라운드숄더, 머리의 이동, 어깨 높이 차이와 함께 보이면 상부 체인 보상 가능성이 커집니다.");
-  }
-
-  if(thoracic === "흉추 커브 감소"){
-    notes.push("흉추 커브 감소가 선택되었습니다. 흉추가 신전 고정된 패턴일 수 있어 요추 전만, 갈비뼈 들림, 골반 경사와 함께 확인하는 것이 좋습니다.");
-  }
-
-  if(pelvic === "골반 전방 경사"){
-    notes.push("골반 전방 경사가 선택되었습니다. 요추 전만 증가, 허리 과신전, 복압 조절 저하, 고관절 앞쪽 압박을 함께 확인하세요.");
-  }
-
-  if(pelvic === "골반 후방 경사"){
-    notes.push("골반 후방 경사가 선택되었습니다. 요추 전만 감소, 허리 말림, 햄스트링 우세, hip hinge 제한을 함께 확인하세요.");
-  }
-
-  if(lumbar === "요추 전만 증가" && pelvic === "골반 전방 경사"){
-    notes.push("요추 전만 증가와 골반 전방 경사가 함께 선택되었습니다. 허리 과신전 전략이 강할 수 있으므로 rib down, 복압, 둔근 조절을 우선 확인하세요.");
-  }
-
-  if(lumbar === "요추 전만 감소" && pelvic === "골반 후방 경사"){
-    notes.push("요추 전만 감소와 골반 후방 경사가 함께 선택되었습니다. 허리 말림과 고관절 접힘 부족이 연결되어 있는지 확인하세요.");
-  }
-
-  return notes;
-}
-
-function renderSummary(){
-  const a = document.getElementById("summaryArea");
-
-  if(!latestRecommendations.length){
-    a.innerHTML = `
-      <div class="box warn">
-        추천 가설이 충분하지 않습니다. 주 증상 중심으로 기능검사를 먼저 진행하세요.
-      </div>
-    `;
-    return;
-  }
-
-  const f = latestRecommendations[0];
-  const s = latestRecommendations[1];
-  const t = latestRecommendations[2];
-
-  const primaryText = `${val("primarySide") ? val("primarySide") + " " : ""}${val("primarySymptom")}`;
-  const secondaryText = val("secondarySymptom")
-    ? `${val("secondarySide") ? val("secondarySide") + " " : ""}${val("secondarySymptom")}`
-    : "";
-
-  const sideNotes = sideMismatchInsight();
-  const curveNotes = curveDirectionInsight();
-
-  let html = `
-    <div class="box">
-      <h3>간단 결과 해석</h3>
-
-      <p>
-        <b>${esc(val("name"))}</b>님 1순위 증상은 
-        <b>${esc(primaryText)}</b>, NRS <b>${esc(val("primaryPain"))}</b>입니다.
-        ${secondaryText ? `2순위는 <b>${esc(secondaryText)}</b>, NRS <b>${esc(val("secondaryPain"))}</b>입니다.` : ""}
-      </p>
-
-      <p>
-        현재 가장 먼저 볼 가설은 <b>${esc(f.item)}</b>입니다.
-        ${s ? `그다음은 <b>${esc(s.item)}</b>, ` : ""}
-        ${t ? `세 번째는 <b>${esc(t.item)}</b>입니다.` : ""}
-      </p>
-
-      <p class="small">
-        결과지는 진단이 아니라 가설입니다. 실제 방향은 기능검사와 개입 후 재검사로 확인합니다.
-      </p>
-    </div>
-  `;
-
-  if(sideNotes.length){
-    html += `
-      <div class="box warn">
-        <h3>좌우 방향성 해석</h3>
-        ${sideNotes.map(n=>`<p>${esc(n)}</p>`).join("")}
-      </div>
-    `;
-  }
-
-  if(curveNotes.length){
-    html += `
-      <div class="box ok">
-        <h3>커브/경사 방향성 해석</h3>
-        ${curveNotes.map(n=>`<p>${esc(n)}</p>`).join("")}
-      </div>
-    `;
-  }
-
-  a.innerHTML = html;
-}
-
-function renderPatterns(){
-  const a = document.getElementById("patternArea");
-
-  if(!latestPatterns.length){
-    a.innerHTML = "";
-    return;
-  }
-
-  a.innerHTML = `
-    <div class="box ok">
-      <h3>방향성 기반 추가 패턴 해석</h3>
-      ${latestPatterns.slice(0,8).map(x=>`
-        <p>
-          <b>${esc(x.title)}</b><br>
-          ${esc(x.meaning)}<br>
-          <span class="small">확인: ${esc(x.tests)} / 개입: ${esc(x.interventions)}</span>
-        </p>
-      `).join("")}
-    </div>
-  `;
-}
-
-function renderRecommendations(){
-  const a = document.getElementById("recommendationArea");
-
-  a.innerHTML = latestRecommendations.map(r=>`
-    <div class="card">
-      <h3>${r.rank}순위 세션 가설: ${esc(r.item)}</h3>
-
-      <span class="tag">${esc(r.category)}</span>
-      <span class="tag">${esc(r.severity)}</span>
-      <span class="tag">점수 ${r.score.toFixed(1)}</span>
-
-      <div class="grid">
-        <div>
-          <p><b>가장 큰 문제</b><br>${esc(r.problem)}</p>
-          <p><b>연결 보상</b><br>${esc(r.compensation)}</p>
-          <p><b>추천 이유</b><br>${esc(r.why)}</p>
-        </div>
-
-        <div>
-          <p><b>오늘 확인할 테스트</b></p>
-          <ul>${r.tests.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-
-          <p><b>개입 추천</b></p>
-          <ul>${r.interventions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-        </div>
-      </div>
-
-      <div class="box warn">
-        <b>변화가 없으면</b><br>
-        ${esc(fallback(r.category))}
-      </div>
-
-      <div class="box ok">
-        <b>회원 설명 예시</b><br>
-        오늘은 ${esc(r.item)}을 ${r.rank}순위 가설로 보고 확인하겠습니다. 기능검사에서 실제로 재현되는지 보고, 짧은 개입 후 같은 검사를 다시 비교해보겠습니다.
-      </div>
-    </div>
+function renderFlagGroup(container,group,defs){
+  const active = current.flags[group];
+  $(container).innerHTML = defs.map(([id,label])=>`
+    <label class="check">
+      <input type="checkbox" data-flag-group="${group}"
+        data-flag="${id}" ${active.includes(id)?"checked":""}>
+      <span>${esc(label)}</span>
+    </label>
   `).join("");
 }
-
-function fallback(cat){
-  if(cat === "상부"){
-    return "흉추 커브 방향, 흉추 회전, 호흡, 1번 늑골/목 보상, 골반-흉곽 정렬을 추가 확인합니다.";
+function renderFindings(){
+  $("findingFields").innerHTML = FINDING_INFO.map(f=>`
+    <label class="finding">
+      <b>${esc(f.name)}</b>
+      <select data-finding="${esc(f.name)}">
+        ${selectedOptions(STATUS_OPTIONS,current.findings[f.name])}
+      </select>
+    </label>
+  `).join("");
+}
+function renderAll(){
+  renderFields("basicFields",BASIC);
+  renderFields("safetyFields",SAFETY);
+  renderFields("symptomFields",SYMPTOM_FIELDS);
+  renderFields("taskFields",TASK);
+  renderFields("photoFields",PHOTO);
+  renderFields("photoDirectionFields",PHOTO_DIR);
+  renderFields("examFields",EXAM);
+  renderFields("closingFields",CLOSING);
+  renderFlagGroup("emergencyChecks","emergency",EMERGENCY_FLAGS);
+  renderFlagGroup("concernChecks","concern",CONCERN_FLAGS);
+  renderFindings();
+  renderHypotheses();
+  renderArchives();
+  renderSafety();
+  renderPhoto();
+  renderAnalysis();
+  updateIdentity();
+}
+function updateIdentity(){
+  $("recordIdentity").textContent =
+    `회원 ID: ${current.memberId} / 세션 ID: ${current.id}` +
+    (dirty ? " / 저장되지 않은 변경 있음" : "");
+}
+function markDirty(affectsAnalysis=true){
+  dirty = true;
+  if(affectsAnalysis && current.analysis.generatedAt){
+    current.analysis.stale = true;
   }
-
-  if(cat === "중간"){
-    return "요추 전만 방향, 골반 경사 방향, 고관절 IR/ER, 하지 정렬, 흉곽 회전, 보행 비대칭을 추가 확인합니다.";
-  }
-
-  return "발목 배측굴곡, 발 아치, 고관절 회전, 골반 경사/회전 보상을 추가 확인합니다.";
+  updateIdentity();
+  renderAnalysis();
+}
+function showTab(id){
+  document.querySelectorAll(".page").forEach(p=>
+    p.classList.toggle("active",p.id===id));
+  document.querySelectorAll(".tab").forEach(b=>
+    b.classList.toggle("active",b.dataset.tab===id));
+  if(id==="recordsPage") renderRecordList();
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-function renderSessionRecordArea(saved){
-  const arr = saved || [{}, {}, {}];
-  const el = document.getElementById("sessionRecordArea");
-  if(!el) return;
-
-  el.innerHTML = [1,2,3].map((n,i)=>{
-    const rec = latestRecommendations[i];
-    const name = rec ? rec.item : `${n}순위 가설`;
-    const s = arr[i] || {};
-
-    return `
-      <div class="card">
-        <h3>${n}순위 가설 기반 세션 기록: ${esc(name)}</h3>
-
-        <p class="small">
-          이 칸은 분석 결과를 보고 실제로 검사/개입을 해본 뒤 입력하는 영역입니다.
-          전후 변화가 있으면 해당 가설의 신뢰도가 올라갑니다.
-        </p>
-
-        <div class="grid">
-          <div>
-            <label>실제로 진행한 검사/세션</label>
-            <textarea id="session${n}Action" placeholder="예: wall slide, 흉추 회전 검사, 좌측 스텝다운, short foot 후 재검사">${esc(s.action || "")}</textarea>
-          </div>
-
-          <div>
-            <label>확인한 문제</label>
-            <textarea id="session${n}Problem" placeholder="예: 어깨 굴곡 시 우측 어깨 으쓱, 좌측 스텝다운 시 무릎 안쪽 붕괴">${esc(s.problem || "")}</textarea>
-          </div>
-        </div>
-
-        <div class="tri">
-          <div>
-            <label>좌우 차이</label>
-            <select id="session${n}Side">
-              <option ${s.side==="선택 안 함" || !s.side ? "selected" : ""}>선택 안 함</option>
-              <option ${s.side==="좌측 문제 큼" ? "selected" : ""}>좌측 문제 큼</option>
-              <option ${s.side==="우측 문제 큼" ? "selected" : ""}>우측 문제 큼</option>
-              <option ${s.side==="양측 비슷" ? "selected" : ""}>양측 비슷</option>
-              <option ${s.side==="좌우 차이 없음" ? "selected" : ""}>좌우 차이 없음</option>
-            </select>
-          </div>
-
-          <div>
-            <label>세션 전 상태</label>
-            <input id="session${n}Before" value="${esc(s.before || "")}" placeholder="예: 어깨 굴곡 150도 / NRS 5">
-          </div>
-
-          <div>
-            <label>세션 후 상태</label>
-            <input id="session${n}After" value="${esc(s.after || "")}" placeholder="예: 어깨 굴곡 170도 / NRS 2">
-          </div>
-        </div>
-
-        <div class="grid">
-          <div>
-            <label>반응</label>
-            <select id="session${n}Response" onchange="renderMeaning(${n})">
-              <option ${s.response==="선택 안 함" || !s.response ? "selected" : ""}>선택 안 함</option>
-              <option ${s.response==="좋아짐" ? "selected" : ""}>좋아짐</option>
-              <option ${s.response==="약간 좋아짐" ? "selected" : ""}>약간 좋아짐</option>
-              <option ${s.response==="변화 없음" ? "selected" : ""}>변화 없음</option>
-              <option ${s.response==="악화" ? "selected" : ""}>악화</option>
-            </select>
-          </div>
-
-          <div>
-            <label>메모</label>
-            <input id="session${n}Note" value="${esc(s.note || "")}" placeholder="예: 통증은 줄었지만 끝범위 제한은 남음">
-          </div>
-        </div>
-
-        <div id="session${n}Meaning"></div>
-      </div>
-    `;
-  }).join("");
-
-  [1,2,3].forEach(renderMeaning);
-}
-
-function renderMeaning(n){
-  const el = document.getElementById(`session${n}Meaning`);
-  if(!el) return;
-
-  const response = val(`session${n}Response`);
-  const side = val(`session${n}Side`);
-  const rec = latestRecommendations[n-1];
-
-  let html = "";
-
-  if(response === "좋아짐"){
-    html += `
-      <div class="box ok">
-        <b>재해석:</b><br>
-        이 세션에서 전후 변화가 뚜렷합니다. 
-        따라서 <b>${esc(rec ? rec.item : `${n}순위 가설`)}</b> 방향은 현재 회원에게 의미 있는 가설일 가능성이 높습니다.
-        다음 세션에서는 같은 방향을 유지하되, 단순 교정에서 실제 동작 통합으로 넘어가는 것이 좋습니다.
-        <br><br>
-        <b>다음 추천:</b><br>
-        - 같은 패턴을 다시 확인<br>
-        - 난이도를 조금 올린 기능운동 적용<br>
-        - 통증 또는 움직임 변화가 유지되는지 재검사
-      </div>
-    `;
+/* 안전성은 자동 진단이 아니라 진행 전 확인 게이트입니다. */
+function safetyGate(record){
+  const s = record.inputs;
+  if(record.flags.emergency.length || s.safetyStatus==="응급 평가 우선"){
+    return {
+      blocked:true,level:"bad",
+      message:"응급 평가 우선: 일반 운동·수기 후보 적용을 중단하고 " +
+        "현재 상태에 맞는 긴급 의료 도움을 요청하세요. " +
+        "응급 상황이 의심되면 119 등 지역 응급 체계를 이용하세요."
+    };
   }
-
-  else if(response === "약간 좋아짐"){
-    html += `
-      <div class="box ok">
-        <b>재해석:</b><br>
-        약간의 변화가 있으므로 방향이 완전히 틀렸다고 보기는 어렵습니다.
-        다만 1차 원인이 아니라 보조 요인일 수 있습니다.
-        <br><br>
-        <b>다음 추천:</b><br>
-        - 같은 방향을 한 번 더 짧게 확인<br>
-        - 좌우 차이 또는 흉곽/골반/하지 연결 패턴을 추가 확인<br>
-        - 변화가 작으면 다음 순위 가설로 넘어가기
-      </div>
-    `;
+  if(s.safetyStatus==="진행 보류·의료 평가"){
+    return {
+      blocked:true,level:"warn",
+      message:"진행 보류 상태입니다. 의료 평가 안내와 실제 조치를 기록하세요."
+    };
   }
-
-  else if(response === "변화 없음"){
-    html += `
-      <div class="box warn">
-        <b>재해석:</b><br>
-        이 세션에서 변화가 거의 없다면, 현재 가설의 우선순위를 낮추는 것이 좋습니다.
-        결과지상 문제는 있어도 오늘의 주 증상과 직접 연결된 1차 원인은 아닐 수 있습니다.
-        <br><br>
-        <b>다음 추천:</b><br>
-        - 다음 순위 가설을 확인<br>
-        - 증상 유발 동작을 다시 설정<br>
-        - 상부 문제라면 흉추 커브/회전, 호흡, 목 보상 확인<br>
-        - 골반/하지 문제라면 골반 경사, 고관절 회전, 발목, 발 아치 확인
-      </div>
-    `;
+  if(s.safetyStatus==="미확인"){
+    return {
+      blocked:true,level:"warn",
+      message:"안전성 확인 전입니다. 먼저 확인 내용과 진행 판단을 기록하세요."
+    };
   }
-
-  else if(response === "악화"){
-    html += `
-      <div class="box bad">
-        <b>재해석:</b><br>
-        개입 후 악화되었다면 현재 방향, 강도, 범위가 맞지 않을 가능성이 있습니다.
-        통증이 증가하거나 신경 증상이 있으면 해당 방향은 중단하고 더 안전한 평가가 우선입니다.
-        <br><br>
-        <b>다음 추천:</b><br>
-        - 강도와 범위 낮추기<br>
-        - 통증 유발 동작 피하기<br>
-        - 다른 체인에서 원인 재탐색<br>
-        - 필요 시 의료 평가 권고
-      </div>
-    `;
+  if(record.flags.concern.length && !s.safetyNote.trim()){
+    return {
+      blocked:true,level:"warn",
+      message:"우려 항목이 있습니다. 새 변화·현재 상태·판단 근거와 " +
+        "실제 조치를 기록한 뒤 진행 여부를 결정하세요."
+    };
   }
-
-  if(side === "좌측 문제 큼" || side === "우측 문제 큼"){
-    html += `
-      <div class="box">
-        <b>좌우 차이 해석:</b><br>
-        ${esc(side)}으로 확인되었습니다. 다음 세션에서는 반대쪽을 기준점으로 삼아 전후 변화를 비교하면 설명이 쉬워집니다.
-      </div>
-    `;
+  if(s.safetyStatus==="확인 후 제한적 진행" && !s.limits.trim()){
+    return {
+      blocked:true,level:"warn",
+      message:"제한적 진행의 허용 범위·중단 기준을 먼저 기록하세요."
+    };
   }
-
-  el.innerHTML = html;
-}
-
-function collectRecord(){
   return {
-    id: currentRecordId || Date.now().toString(),
-    updatedAt: new Date().toISOString(),
-
-    name: val("name").trim(),
-    age: val("age"),
-    gender: val("gender"),
-    memo: val("memo"),
-
-    primarySymptom: val("primarySymptom"),
-    primarySide: val("primarySide"),
-    primaryPain: val("primaryPain"),
-
-    secondarySymptom: val("secondarySymptom"),
-    secondarySide: val("secondarySide"),
-    secondaryPain: val("secondaryPain"),
-
-    goal: val("goal"),
-
-    severe: checked("severe"),
-    warning: checked("warning"),
-    normal: checked("normal"),
-
-    directions: Object.fromEntries([
-      "shoulderSide",
-      "legSide",
-      "pelvisRotation",
-      "thoraxRotation",
-      "thoracicLimit",
-      "pelvisHeightSide",
-      "thoracicCurveDir",
-      "pelvicTiltDir",
-      "lumbarCurveDir",
-      "leftFootDir",
-      "leftKneeDir",
-      "leftArch",
-      "leftHipIR",
-      "leftHipER",
-      "rightFootDir",
-      "rightKneeDir",
-      "rightArch",
-      "rightHipIR",
-      "rightHipER"
-    ].map(id=>[id, val(id)])),
-
-    recommendations: latestRecommendations,
-    patterns: latestPatterns,
-
-    sessions: [1,2,3].map(n=>({
-      action: val(`session${n}Action`),
-      problem: val(`session${n}Problem`),
-      side: val(`session${n}Side`),
-      before: val(`session${n}Before`),
-      after: val(`session${n}After`),
-      response: val(`session${n}Response`),
-      note: val(`session${n}Note`)
-    }))
+    blocked:false,
+    level:s.safetyStatus==="확인 후 제한적 진행"?"warn":"ok",
+    message:"담당자가 진행 판단을 기록했습니다. 이는 자동 안전 판정이 아닙니다. " +
+      "새 증상이나 우려되는 반응이 생기면 다시 확인하세요."
   };
 }
+function renderSafety(){
+  const g = safetyGate(current);
+  $("safetyOutput").innerHTML =
+    `<div class="box ${g.level}">${esc(g.message)}</div>`;
+}
 
-function saveRecord(){
-  if(!val("name").trim()){
-    alert("이름을 입력해주세요.");
+/* 촬영 참고 목록 정렬: 검증된 임상 점수가 아닙니다. */
+function photoCandidates(record){
+  const region = REGION_BY_SYMPTOM[record.inputs.primarySymptom] || "general";
+  return FINDING_INFO
+    .filter(f=>["경계","심각"].includes(record.findings[f.name]))
+    .map(f=>({
+      ...f,status:record.findings[f.name],
+      displayPriority:record.findings[f.name]==="심각"?2:1,
+      sameRegion:f.region===region
+    }))
+    .sort((a,b)=>
+      b.displayPriority-a.displayPriority ||
+      Number(b.sameRegion)-Number(a.sameRegion));
+}
+function renderPhoto(){
+  const values = Object.values(current.findings);
+  const missing = values.filter(v=>v==="미입력").length;
+  const normal = values.filter(v=>v==="유지").length;
+  const abnormal = photoCandidates(current);
+  let html = `<p class="small">
+    미입력 ${missing} / 유지 ${normal} / 경계·심각 ${abnormal.length}.
+    미입력은 정상으로 처리하지 않습니다.
+  </p>`;
+  if(!abnormal.length){
+    html += `<div class="box">
+      경계·심각으로 입력한 촬영 소견이 없습니다.
+      증상·과제 기반 평가 후보는 별도로 만들 수 있습니다.
+    </div>`;
+  }
+  if(current.inputs.photoQuality!=="기록함" && abnormal.length){
+    html += `<div class="box warn">
+      촬영 조건이 충분히 확인되지 않았거나 차이가 있습니다.
+      소견의 반복 확인과 조건 기록을 먼저 고려하세요.
+    </div>`;
+  }
+  $("photoOutput").innerHTML = html;
+  $("referenceOutput").innerHTML = abnormal.length
+    ? abnormal.map(f=>{
+      const r = REGION_INFO[f.region];
+      return `<div class="box">
+        <b>${esc(f.name)}</b> <span class="tag">${esc(f.status)}</span>
+        <p>근육·영역 참고: ${esc(r.muscles.join(", "))}</p>
+        <p>평가 참고: ${esc(r.tests)}</p>
+        <p class="small">${esc(f.note)}</p>
+      </div>`;
+    }).join("")
+    : `<p class="small">입력된 경계·심각 촬영 소견이 없습니다.</p>`;
+}
+
+function confirmedExam(record){
+  return EXAM.filter(s=>s.type==="select")
+    .filter(s=>{
+      const v=record.inputs[s.id];
+      return ["제한 확인","좌우 차이 확인"].includes(v) ||
+        (s.id==="dynamicKnee" &&
+         ["좌측 안쪽 이동 관찰","우측 안쪽 이동 관찰",
+          "양측 안쪽 이동 관찰","다른 움직임 관찰"].includes(v));
+    })
+    .map(s=>({id:s.id,label:s.label,value:record.inputs[s.id]}));
+}
+function blankHypothesis(index){
+  const h={id:uid(),selected:index===0,origin:"manual"};
+  H_SPECS.forEach(s=>{
+    h[s.id]=s.type==="select"?s.options[0]:"";
+  });
+  return h;
+}
+function taskName(inputs){
+  return inputs.task.trim() ||
+    (inputs.taskKind!=="선택 안 함"?inputs.taskKind:"");
+}
+function taskAdjustment(inputs){
+  switch(inputs.taskKind){
+    case "계단·스텝다운":
+      return "発板の高さまたは反復回数のうち一つを変更";
+    case "ス쿼트":
+      return "깊이 또는 반복 수 중 하나를 변경";
+    case "팔 올리기":
+      return "팔을 올리는 범위 또는 외부 부하 중 하나를 변경";
+    case "걷기":
+      return "거리·시간·속도 중 하나를 변경";
+    case "달리기":
+      return "속도·시간·거리 중 하나를 변경";
+    case "한발서기":
+      return "손 지지 유무 또는 유지 시간 중 하나를 변경";
+    case "앉기·서기":
+      return "의자 높이 또는 반복 수 중 하나를 변경";
+    default:
+      return "범위·속도·반복·외부 부하 중 하나를 변경";
+  }
+}
+/* 한국어 출력과 정확한 선택 값 사용 */
+function adjustment(inputs){
+  if(inputs.taskKind==="계단·스텝다운")
+    return "발판 높이 또는 반복 수 중 하나를 변경";
+  if(inputs.taskKind==="스쿼트")
+    return "깊이 또는 반복 수 중 하나를 변경";
+  return taskAdjustment(inputs);
+}
+function supportAdjustment(inputs){
+  switch(inputs.taskKind){
+    case "팔 올리기":
+      return "앉기/서기 또는 팔 지지 조건 중 하나를 변경";
+    case "목 돌리기":
+      return "앉은 자세의 지지 조건을 하나 변경";
+    case "걷기":
+    case "달리기":
+      return "비교 가능한 환경에서 속도나 조건 하나를 변경";
+    case "한발서기":
+    case "계단·스텝다운":
+    case "스쿼트":
+    case "앉기·서기":
+      return "보조 지지·발 위치·도구 높이 중 하나를 변경";
+    default:
+      return "보조 지지·시작 자세·동작 지시 중 하나를 변경";
+  }
+}
+function taskRegion(inputs){
+  const symptomRegion = REGION_BY_SYMPTOM[inputs.primarySymptom] || "general";
+  if(symptomRegion!=="general") return symptomRegion;
+  const map={
+    "목 돌리기":"neck","팔 올리기":"shoulder","몸통 회전":"thorax",
+    "허리 굽히기·펴기":"trunk","힙힌지":"hip","스쿼트":"knee",
+    "계단·스텝다운":"knee","한발서기":"hip",
+    "걷기":"hip","달리기":"hip","앉기·서기":"knee"
+  };
+  return map[inputs.taskKind] || "general";
+}
+function additionalAssessment(record){
+  const s=record.inputs;
+  const lines=[];
+  const confirmed=confirmedExam(record);
+  confirmed.forEach(x=>lines.push(
+    `${x.label}에서 ${x.value}으로 입력했습니다. ` +
+    "평가 방법·조건과 과제 관련성을 확인하고, " +
+    "원인을 단정하지 않은 상태에서 필요한 비교를 선택합니다."
+  ));
+  const feetOut=["leftFootDir","rightFootDir"].some(id=>s[id]==="바깥쪽");
+  if(feetOut){
+    lines.push(
+      "발끝이 바깥쪽으로 관찰됐다는 이유만으로 고관절 내회전 제한을 " +
+      "추정하거나 무릎·발을 정면으로 강제하지 않습니다."
+    );
+  }
+  if(s.pelvisRotation!==UNKNOWN && s.thoraxRotation!==UNKNOWN){
+    lines.push(
+      "골반·흉곽 방향을 모두 기록했지만 좌표 정의가 다를 수 있으므로 " +
+      "자동으로 반대 회전·보상 관계를 판정하지 않습니다."
+    );
+  }
+  if(s.dynamicKnee!==UNKNOWN &&
+     s.dynamicKnee!=="특이 움직임 확인하지 않음"){
+    lines.push(
+      "무릎의 관찰된 이동과 통증·수행은 별개로 기록합니다. " +
+      "모든 안쪽 이동을 병적 붕괴나 특정 근육 약화로 해석하지 않습니다."
+    );
+  }
+  if(s.loadChange.trim()){
+    lines.push(
+      "최근 활동량 변화가 기록됐습니다. 자세 교정만 보지 말고 " +
+      "전체 활동량·회복·증상 반응을 함께 확인합니다."
+    );
+  }
+  if(s.primaryPain!=="" && Number(s.primaryPain)>=7){
+    lines.push(
+      "높은 통증 강도가 입력됐습니다. 특정 자세 원인 점수를 올리지 않고, " +
+      "추가 문진과 허용 가능한 평가 범위·부하를 확인합니다."
+    );
+  }
+  if(s.primarySymptom==="통증 없음" || s.primaryPain==="0"){
+    lines.push(
+      "통증이 없거나 현재 NRS 0이면 통증 감소 대신 수행·범위·안정감과 " +
+      "회원 목표를 비교합니다."
+    );
+  }
+  if(s.age!=="" && Number(s.age)<18){
+    lines.push(
+      "성인 지침을 그대로 적용하지 않습니다. " +
+      "연령·성장·관련 병력에 맞는 평가가 필요합니다."
+    );
+  }
+  return [...new Set(lines)];
+}
+function buildHypotheses(record){
+  const s=record.inputs;
+  const task=taskName(s);
+  if(!task) return [];
+  const region=taskRegion(s);
+  const r=REGION_INFO[region];
+  const photo=photoCandidates(record);
+  const exam=confirmedExam(record);
+  const selectedPhoto=photo.filter(f=>f.region===region).slice(0,2);
+  const commonBasis=[
+    `회원 보고: ${s.primarySide} / ${s.primarySymptom}`,
+    `목표: ${s.goal || "未記録"}`,
+    `기준 과제: ${task}`,
+    s.aggravating?`발생·증가 조건: ${s.aggravating}`:"",
+    s.easing?`줄어드는 조건: ${s.easing}`:""
+  ].filter(Boolean).join("\n").replace("未記録","미기록");
+  const muscleText=r.muscles.length
+    ? r.muscles.join(", ") +
+      "\n참고 목록입니다. 긴장·약화·원인 판정은 아닙니다."
+    : "과제 관련 영역을 먼저 확인한 뒤 근육 목록을 직접 추가하세요.";
+  const h1=blankHypothesis(0);
+  Object.assign(h1,{
+    origin:"task-load",
+    title:"과제의 범위·부하·반복에 대한 반응",
+    statement:`${task}에서 범위·부하·반복 조건 하나를 바꾸면 ` +
+      "증상 또는 수행이 달라지는지 확인한다.",
+    basis:commonBasis,
+    muscles:muscleText,
+    test:`안전성이 허용하는 기준 조건에서 ${task}의 ` +
+      "증상 위치·강도, 수행·안정감·범위를 먼저 기록한다.",
+    prediction:"변화가 있을 수도 없을 수도 있다. " +
+      "어떤 지표를 비교할지 미리 정하고 결과를 기록한다.",
+    change:adjustment(s),
+    intervention:"평가 결과와 허용 반응에 따라 과제 범위·양·부하 조절을 선택. " +
+      "특정 근육 수기나 강화 방향을 촬영만으로 결정하지 않음."
+  });
+  const h2=blankHypothesis(1);
+  Object.assign(h2,{
+    origin:"regional-function",
+    title:`${r.name} 및 주변 관절·근육 기능 확인`,
+    statement:`${task}와 관련된 관절 움직임·근육 기능에서 ` +
+      "추가 확인할 제한이나 좌우 차이가 있는지 평가한다.",
+    basis:[
+      commonBasis,
+      exam.length
+        ? "직접 평가 입력:\n"+exam.map(x=>`${x.label}: ${x.value}`).join("\n")
+        : "직접 확인한 범위·근력 제한은 아직 입력되지 않음.",
+      selectedPhoto.length
+        ? "촬영 참고 소견:\n"+selectedPhoto.map(f=>
+            `${f.name}: ${f.status}`).join("\n")
+        : "해당 영역의 경계·심각 촬영 소견을 근거로 사용하지 않음."
+    ].join("\n"),
+    muscles:muscleText,
+    test:r.tests + ". 모든 검사를 일괄 적용하지 않고 필요한 것만 선택.",
+    prediction:"평가에서 확인한 사실과 과제의 관계를 기록한다. " +
+      "제한이 있더라도 원인인지 자동 판단하지 않는다.",
+    change:"평가에서 필요한 조건 하나를 선정. " +
+      "특정 관절·근육 개입 후 비교한다면 다른 조건과 개입을 최소화.",
+    intervention:r.intervention +
+      ". 수기·운동은 자격·업무 범위와 안전성 확인 내에서 선택."
+  });
+  const h3=blankHypothesis(2);
+  Object.assign(h3,{
+    origin:"task-strategy",
+    title:"지지·시작 자세·동작 지시에 대한 반응",
+    statement:`${task}에서 지지·시작 자세·동작 지시 중 하나를 바꾸면 ` +
+      "증상·수행·안정감이 달라지는지 확인한다.",
+    basis:commonBasis + "\n이 후보는 과제 기반 비교 관점이며, " +
+      "특정 자세나 반대쪽 근육을 원인으로 판정한 것이 아님.",
+    muscles:muscleText,
+    test:"같은 과제에서 조건 하나를 바꾼 뒤 가능한 한 같은 지표로 비교.",
+    prediction:"지지·지시 변화에 대한 반응을 관찰한다. " +
+      "개선되더라도 특정 체인·근육 원인을 확정하지 않는다.",
+    change:supportAdjustment(s),
+    intervention:"허용 가능한 과제 변형·보조 지지·동작 연습을 평가 후 선택. " +
+      "정렬을 강제로 맞추는 방식은 자동 추천하지 않음."
+  });
+  return [h1,h2,h3];
+}
+
+function renderAnalysis(){
+  const a=current.analysis;
+  let html="";
+  if(a.generatedAt){
+    html+=`<p class="small">후보 생성: ${
+      esc(new Date(a.generatedAt).toLocaleString("ko-KR"))
+    }</p>`;
+    if(a.stale){
+      html+=`<div class="box warn">
+        입력이 변경됐습니다. 아래 후보는 이전 입력으로 생성한 내용입니다.
+        갱신 전에도 기존 평가 기록은 유지됩니다.
+      </div>`;
+    }
+  }
+  const notes=additionalAssessment(current);
+  if(notes.length){
+    html+=`<div class="box">
+      <b>추가 고려 사항</b>
+      <ul>${notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+    </div>`;
+  }
+  $("analysisOutput").innerHTML=html;
+}
+function renderHypotheses(){
+  if(!current.hypotheses.length){
+    $("hypothesisArea").innerHTML=`
+      <p class="small">
+        기준 과제와 안전성 확인 후 후보를 생성하세요.
+        생성되는 세 후보를 모두 평가할 필요는 없습니다.
+      </p>`;
+    return;
+  }
+  $("hypothesisArea").innerHTML=current.hypotheses.map((h,i)=>`
+    <article class="card">
+      <h3>후보 ${i+1}</h3>
+      <label class="check">
+        <input type="checkbox" data-h-index="${i}"
+          data-h-field="selected" ${h.selected?"checked":""}>
+        <span>오늘 확인할 후보로 선택</span>
+      </label>
+      <div class="grid">
+        ${H_SPECS.map(s=>`
+          <label class="field">
+            <span>${esc(s.label)}</span>
+            ${control(s,h[s.id],
+              `data-h-index="${i}" data-h-field="${esc(s.id)}"`)}
+          </label>
+        `).join("")}
+      </div>
+      <div id="meaning${i}"></div>
+    </article>
+  `).join("");
+  current.hypotheses.forEach((_,i)=>renderMeaning(i));
+}
+function interpretation(h){
+  const lines=[];
+  const before=numberOrNull(h.beforePain);
+  const after=numberOrNull(h.afterPain);
+  if(h.comparison!=="같음"){
+    lines.push(
+      "전후 조건이 같다고 확인되지 않았습니다. " +
+      "숫자 차이를 동일 조건의 개선으로 자동 해석하지 않습니다."
+    );
+  }else if(before!==null && after!==null){
+    if(before===0){
+      lines.push(
+        "전 NRS가 0입니다. 통증 감소로 설명하지 말고 수행·범위·안정감을 비교하세요."
+      );
+    }
+    const delta=before-after;
+    lines.push(
+      `기록한 NRS 차이(전−후): ${delta}. ` +
+      "단순 수치 차이이며 임상적으로 의미 있는 개선의 자동 판정은 아닙니다."
+    );
+  }else{
+    lines.push("전후 NRS가 모두 측정되지 않았습니다. 기록한 수행·범위·반응을 비교하세요.");
+  }
+  switch(h.response){
+    case "개선 관찰":
+    case "일부 개선 관찰":
+      lines.push(
+        "이번 조건에서 개선 반응을 기록했습니다. " +
+        "특정 자세·근육 원인을 확정하지 말고 반복 확인과 회복 반응을 함께 보세요."
+      );
+      break;
+    case "변화 확인하지 못함":
+      lines.push(
+        "이번 비교에서 변화를 확인하지 못했습니다. " +
+        "측정·과제·개입량·재평가 시점을 점검한 뒤 가설 판단을 직접 선택하세요."
+      );
+      break;
+    case "악화 관찰":
+      lines.push(
+        "개입·과제의 진행을 멈추고 증상·범위·강도와 안전성을 재확인하세요. " +
+        "새 신경 증상이나 응급 상황이 의심되면 의료 평가가 우선입니다."
+      );
+      break;
+    case "혼합 반응":
+      lines.push(
+        "통증·수행·범위 등 어떤 지표가 좋아지고 나빠졌는지 구분하세요."
+      );
+      break;
+    case "평가하지 않음":
+      lines.push("평가하지 않은 후보는 결과로 지지·기각하지 않습니다.");
+      break;
+  }
+  if(h.nextDay==="악화·지속 반응"){
+    lines.push(
+      "지연된 악화·지속 반응을 기록했습니다. 즉시 반응만으로 " +
+      "부하를 늘리지 말고 다음 계획·안전성을 다시 검토하세요."
+    );
+  }
+  if(h.timing==="전체 세션 후"){
+    lines.push(
+      "여러 개입 후 재평가라면 어떤 개입이 변화를 만들었는지 구분하기 어렵습니다."
+    );
+  }
+  return lines;
+}
+function renderMeaning(index){
+  const el = $("meaning" + index);
+  const h = current.hypotheses[index];
+  if(!el || !h) return;
+
+  const lines = interpretation(h);
+  const bad =
+    h.response === "악화 관찰" ||
+    h.nextDay === "악화·지속 반응";
+
+  el.innerHTML = `
+    <div class="box ${bad ? "bad" : ""}">
+      <b>기록 해석 참고 — 자동 가설 확정 아님</b>
+      <ul>
+        ${lines.map(line => `<li>${esc(line)}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
+/* 앞부분의 과제 조정 함수를 한국어 출력으로 교체합니다.
+   같은 스크립트 안에서 이 선언이 기존 선언을 대체합니다. */
+function taskAdjustment(inputs){
+  switch(inputs.taskKind){
+    case "계단·스텝다운":
+      return "발판 높이 또는 반복 수 중 하나를 변경";
+    case "스쿼트":
+      return "깊이 또는 반복 수 중 하나를 변경";
+    case "팔 올리기":
+      return "팔을 올리는 범위 또는 외부 부하 중 하나를 변경";
+    case "걷기":
+      return "거리·시간·속도 중 하나를 변경";
+    case "달리기":
+      return "속도·시간·거리 중 하나를 변경";
+    case "한발서기":
+      return "손 지지 유무 또는 유지 시간 중 하나를 변경";
+    case "앉기·서기":
+      return "의자 높이 또는 반복 수 중 하나를 변경";
+    default:
+      return "범위·속도·반복·외부 부하 중 하나를 변경";
+  }
+}
+
+/* -----------------------------
+   기록 보관 표시
+----------------------------- */
+
+function renderArchives(){
+  const el = $("archiveOutput");
+  let html = "";
+
+  if(current.legacy){
+    html += `
+      <details>
+        <summary>이전 형식 원문 기록</summary>
+        <p class="small">
+          이전 기록을 보존한 것입니다.
+          이전 추천 문구가 새 규칙으로 검증됐다는 뜻은 아닙니다.
+        </p>
+        <pre>${esc(JSON.stringify(current.legacy, null, 2))}</pre>
+      </details>
+    `;
+  }
+
+  current.archives.forEach((archive, index)=>{
+    html += `
+      <details>
+        <summary>
+          이전 후보 ${index + 1} —
+          ${esc(archive.savedAt
+            ? new Date(archive.savedAt).toLocaleString("ko-KR")
+            : "시점 미기록")}
+        </summary>
+        <p class="small">${esc(archive.reason || "")}</p>
+        <pre>${esc(JSON.stringify(archive.hypotheses, null, 2))}</pre>
+      </details>
+    `;
+  });
+
+  el.innerHTML = html || `
+    <p class="small">보관된 이전 후보·이전 형식 기록이 없습니다.</p>
+  `;
+}
+
+/* -----------------------------
+   입력 동기화
+----------------------------- */
+
+function syncVisibleInputs(){
+  if(!current) return;
+
+  document.querySelectorAll("[data-input]").forEach(el=>{
+    const id = el.dataset.input;
+    if(INPUT_IDS.has(id)){
+      current.inputs[id] = el.value;
+    }
+  });
+
+  document.querySelectorAll("[data-finding]").forEach(el=>{
+    if(Object.prototype.hasOwnProperty.call(
+      current.findings, el.dataset.finding
+    )){
+      current.findings[el.dataset.finding] = el.value;
+    }
+  });
+
+  ["emergency", "concern"].forEach(group=>{
+    current.flags[group] = [
+      ...document.querySelectorAll(
+        `[data-flag-group="${group}"]:checked`
+      )
+    ].map(el => el.dataset.flag);
+  });
+
+  document.querySelectorAll("[data-h-index][data-h-field]")
+    .forEach(el=>{
+      const index = Number(el.dataset.hIndex);
+      const field = el.dataset.hField;
+      const h = current.hypotheses[index];
+      if(!h) return;
+
+      if(field === "selected"){
+        h.selected = el.checked;
+      } else if(H_SPECS.some(s=>s.id === field)){
+        h[field] = el.value;
+      }
+    });
+}
+
+function handleEditorInput(event){
+  const el = event.target;
+
+  if(el.dataset.input){
+    const id = el.dataset.input;
+    if(!INPUT_IDS.has(id)) return;
+
+    current.inputs[id] = el.value;
+
+    const doesNotChangeCandidates =
+      BASIC.some(s=>s.id === id) ||
+      CLOSING.some(s=>s.id === id);
+
+    markDirty(!doesNotChangeCandidates);
+
+    if(SAFETY.some(s=>s.id === id)){
+      renderSafety();
+    }
+
+    if(
+      PHOTO.some(s=>s.id === id) ||
+      PHOTO_DIR.some(s=>s.id === id)
+    ){
+      renderPhoto();
+    }
     return;
   }
 
-  const r = collectRecord();
-  currentRecordId = r.id;
+  if(el.dataset.finding){
+    current.findings[el.dataset.finding] = el.value;
+    markDirty(true);
+    renderPhoto();
+    return;
+  }
 
-  const arr = getRecords();
-  const i = arr.findIndex(x=>x.id === r.id);
+  if(el.dataset.flagGroup){
+    const group = el.dataset.flagGroup;
+    current.flags[group] = [
+      ...document.querySelectorAll(
+        `[data-flag-group="${group}"]:checked`
+      )
+    ].map(item=>item.dataset.flag);
 
-  if(i >= 0) arr[i] = r;
-  else arr.push(r);
+    markDirty(true);
+    renderSafety();
+    return;
+  }
 
-  localStorage.setItem("motiRecords", JSON.stringify(arr));
-  renderMemberList();
-  alert("저장되었습니다.");
+  if(el.dataset.hIndex !== undefined){
+    const index = Number(el.dataset.hIndex);
+    const field = el.dataset.hField;
+    const h = current.hypotheses[index];
+    if(!h) return;
+
+    if(field === "selected"){
+      h.selected = el.checked;
+    } else if(H_SPECS.some(s=>s.id === field)){
+      h[field] = el.value;
+    } else {
+      return;
+    }
+
+    markDirty(false);
+    renderMeaning(index);
+  }
 }
 
-function getRecords(){
-  return JSON.parse(localStorage.getItem("motiRecords") || "[]");
+/* -----------------------------
+   候補生成
+----------------------------- */
+
+function validateNumericInputs(record){
+  const checks = [
+    ["primaryPain", 0, 10],
+    ["secondaryPain", 0, 10],
+    ["age", 1, 120],
+    ["visit", 1, 100000]
+  ];
+
+  for(const [id, min, max] of checks){
+    const value = record.inputs[id];
+    if(value === "") continue;
+
+    const n = Number(value);
+    if(!Number.isFinite(n) || n < min || n > max){
+      return `${ALL_SPECS.find(s=>s.id === id)?.label || id}の入力範囲を確認してください。`;
+    }
+
+    if(["age", "visit"].includes(id) && !Number.isInteger(n)){
+      return `${ALL_SPECS.find(s=>s.id === id)?.label || id}: 정수로 입력하세요.`;
+    }
+  }
+
+  for(let i = 0; i < record.hypotheses.length; i++){
+    const h = record.hypotheses[i];
+    for(const field of ["beforePain", "afterPain"]){
+      if(h[field] === "") continue;
+      const n = Number(h[field]);
+      if(!Number.isFinite(n) || n < 0 || n > 10){
+        return `후보 ${i + 1}의 전후 NRS는 0–10 또는 빈칸이어야 합니다.`;
+      }
+    }
+  }
+
+  return "";
 }
 
-function renderMemberList(){
-  const arr = getRecords().sort((a,b)=>new Date(b.updatedAt) - new Date(a.updatedAt));
+/* 앞 함수의 한국어 메시지 수정용 래퍼 */
+function numericError(record){
+  return validateNumericInputs(record)
+    .replace("の入力範囲を確認してください。", ": 입력 범위를 확인하세요.");
+}
 
-  document.getElementById("memberList").innerHTML = arr.length
-    ? arr.map(r=>{
-        const symptomText = `${r.primarySide ? r.primarySide + " " : ""}${r.primarySymptom || ""}`;
+function generateCandidates(){
+  syncVisibleInputs();
 
-        return `
-          <div class="member" onclick="loadRecord('${r.id}')">
-            <b>${esc(r.name)}</b>
-            <span class="small"> / ${esc(r.age || "")}세 / ${esc(symptomText)}</span>
-            <br>
-            <span class="small">${new Date(r.updatedAt).toLocaleString("ko-KR")}</span>
-          </div>
-        `;
-      }).join("")
-    : `<p class="small">저장된 기록이 없습니다.</p>`;
+  const numeric = numericError(current);
+  if(numeric){
+    notify(numeric, true);
+    return;
+  }
+
+  const gate = safetyGate(current);
+  renderSafety();
+
+  if(gate.blocked){
+    notify("후보 생성 전 안전성 확인·진행 판단을 먼저 정리하세요.", true);
+    return;
+  }
+
+  if(!taskName(current.inputs)){
+    notify("구체적인 기준 과제 또는 과제 종류를 입력하세요.", true);
+    return;
+  }
+
+  const next = buildHypotheses(current);
+  if(!next.length){
+    notify("현재 입력으로 후보를 만들지 못했습니다.", true);
+    return;
+  }
+
+  if(current.hypotheses.length){
+    const ok = confirm(
+      "기존 가설과 평가 기록을 ‘이전 가설 보관’에 남기고 " +
+      "새 후보를 생성할까요?\n\n" +
+      "기존 후보의 전후 결과는 새 후보에 자동 연결하지 않습니다."
+    );
+    if(!ok) return;
+
+    if(current.archives.length >= 100){
+      notify(
+        "이 회차의 이전 후보 보관이 100개에 도달했습니다. " +
+        "기존 기록을 백업하고 새 회차를 생성하세요.",
+        true
+      );
+      return;
+    }
+
+    current.archives.push({
+      savedAt: new Date().toISOString(),
+      reason: "후보 재생성 전 기존 가설·평가 기록 보관",
+      hypotheses: copy(current.hypotheses)
+    });
+  }
+
+  current.hypotheses = next;
+  current.analysis = {
+    generatedAt: new Date().toISOString(),
+    stale: false
+  };
+
+  dirty = true;
+  renderHypotheses();
+  renderArchives();
+  renderAnalysis();
+  updateIdentity();
+
+  notify(
+    "후보를 생성했습니다. " +
+    "필요한 후보만 선택하고 내용을 검토·수정하세요. 아직 저장 전입니다."
+  );
+}
+
+/* -----------------------------
+   JSON 검증·정규화
+----------------------------- */
+
+function isObject(value){
+  return value !== null &&
+    typeof value === "object" &&
+    !Array.isArray(value);
+}
+
+function validatedString(value, label = "텍스트"){
+  if(value === null || value === undefined) return "";
+  if(typeof value !== "string" && typeof value !== "number"){
+    throw new Error(`${label} 자료형이 올바르지 않습니다.`);
+  }
+
+  const result = String(value);
+  if(result.length > MAX_TEXT){
+    throw new Error(`${label} 길이가 허용 범위를 초과했습니다.`);
+  }
+  return result;
+}
+
+function readSpecValue(s, value){
+  if(value === undefined || value === null){
+    return s.type === "select" ? s.options[0] : "";
+  }
+
+  const v = validatedString(value, s.label);
+
+  if(s.type === "select"){
+    if(!s.options.includes(v)){
+      throw new Error(`${s.label}: 알 수 없는 선택 값입니다.`);
+    }
+  }
+
+  if(s.type === "date" && v && !/^\d{4}-\d{2}-\d{2}$/.test(v)){
+    throw new Error(`${s.label}: 날짜 형식이 올바르지 않습니다.`);
+  }
+
+  return v;
+}
+
+function normalizeHypothesis(raw){
+  if(!isObject(raw)){
+    throw new Error("가설 기록 형식이 올바르지 않습니다.");
+  }
+
+  const h = {
+    id: validId(raw.id) ? raw.id : uid(),
+    selected: raw.selected === true,
+    origin: validatedString(raw.origin || "imported", "후보 출처")
+  };
+
+  H_SPECS.forEach(s=>{
+    h[s.id] = readSpecValue(s, raw[s.id]);
+  });
+
+  return h;
+}
+
+function validatePreservedJSON(value, label){
+  if(value === null || value === undefined) return null;
+  if(!isObject(value)){
+    throw new Error(`${label} 형식이 올바르지 않습니다.`);
+  }
+
+  const encoded = JSON.stringify(value);
+  if(encoded.length > 250000){
+    throw new Error(`${label} 원문 크기가 허용 범위를 초과했습니다.`);
+  }
+  return JSON.parse(encoded);
+}
+
+function normalizeRecord(raw){
+  if(!isObject(raw)){
+    throw new Error("세션 기록 형식이 올바르지 않습니다.");
+  }
+
+  if(!validId(raw.id) || !validId(raw.memberId)){
+    throw new Error("회원 또는 세션 ID 형식이 올바르지 않습니다.");
+  }
+
+  if(!isObject(raw.inputs) || !isObject(raw.findings)){
+    throw new Error("입력 또는 촬영 소견 형식이 올바르지 않습니다.");
+  }
+
+  const r = blankRecord();
+  r.id = raw.id;
+  r.memberId = raw.memberId;
+
+  r.createdAt = Number.isFinite(Date.parse(raw.createdAt))
+    ? raw.createdAt : new Date().toISOString();
+
+  r.updatedAt = Number.isFinite(Date.parse(raw.updatedAt))
+    ? raw.updatedAt : r.createdAt;
+
+  ALL_SPECS.forEach(s=>{
+    r.inputs[s.id] = readSpecValue(s, raw.inputs[s.id]);
+  });
+
+  if(!r.inputs.date) r.inputs.date = today();
+
+  FINDING_INFO.forEach(f=>{
+    const v = raw.findings[f.name] ?? "미입력";
+    if(!STATUS_OPTIONS.includes(v)){
+      throw new Error(`${f.name}: 등급 값이 올바르지 않습니다.`);
+    }
+    r.findings[f.name] = v;
+  });
+
+  if(raw.flags !== undefined && !isObject(raw.flags)){
+    throw new Error("안전성 선택 형식이 올바르지 않습니다.");
+  }
+
+  ["emergency", "concern"].forEach(group=>{
+    const values = raw.flags?.[group] ?? [];
+    const allowed = (
+      group === "emergency" ? EMERGENCY_FLAGS : CONCERN_FLAGS
+    ).map(x=>x[0]);
+
+    if(
+      !Array.isArray(values) ||
+      values.some(v=>!allowed.includes(v))
+    ){
+      throw new Error("안전성 선택 값이 올바르지 않습니다.");
+    }
+
+    r.flags[group] = [...new Set(values)];
+  });
+
+  const hypotheses = raw.hypotheses ?? [];
+  if(!Array.isArray(hypotheses) || hypotheses.length > 3){
+    throw new Error("현재 후보 개수는 최대 3개여야 합니다.");
+  }
+  r.hypotheses = hypotheses.map(normalizeHypothesis);
+
+  const archives = raw.archives ?? [];
+  if(!Array.isArray(archives) || archives.length > 100){
+    throw new Error("이전 가설 보관 형식·개수를 확인하세요.");
+  }
+
+  r.archives = archives.map(a=>{
+    if(
+      !isObject(a) ||
+      !Array.isArray(a.hypotheses) ||
+      a.hypotheses.length > 3
+    ){
+      throw new Error("이전 가설 보관 형식이 올바르지 않습니다.");
+    }
+
+    return {
+      savedAt: Number.isFinite(Date.parse(a.savedAt))
+        ? a.savedAt : "",
+      reason: validatedString(a.reason || "", "보관 사유"),
+      hypotheses: a.hypotheses.map(normalizeHypothesis)
+    };
+  });
+
+  r.legacy = validatePreservedJSON(raw.legacy, "이전 기록");
+
+  r.analysis = {
+    generatedAt: Number.isFinite(Date.parse(raw.analysis?.generatedAt))
+      ? raw.analysis.generatedAt : "",
+    stale: raw.analysis?.stale === true
+  };
+
+  const numeric = numericError(r);
+  if(numeric) throw new Error(numeric);
+
+  return r;
+}
+
+function validateRecordArray(arr){
+  if(!Array.isArray(arr) || arr.length > MAX_RECORDS){
+    throw new Error(`기록은 배열 형식이며 최대 ${MAX_RECORDS}개여야 합니다.`);
+  }
+
+  const result = arr.map(normalizeRecord);
+  const ids = new Set();
+
+  result.forEach(r=>{
+    if(ids.has(r.id)){
+      throw new Error("중복 세션 ID가 있습니다.");
+    }
+    ids.add(r.id);
+  });
+
+  return result;
+}
+
+/* -----------------------------
+   저장
+----------------------------- */
+
+function readStoredRecords(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw){
+      storageHealthy = true;
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    if(
+      !isObject(parsed) ||
+      parsed.version !== VERSION ||
+      !Array.isArray(parsed.records)
+    ){
+      throw new Error("저장 데이터 버전 또는 형식을 확인하세요.");
+    }
+
+    const valid = validateRecordArray(parsed.records);
+    storageHealthy = true;
+    return valid;
+  } catch(error){
+    storageHealthy = false;
+    notify(
+      "저장 데이터를 읽지 못했습니다. 기존 데이터를 덮어쓰지 않습니다. " +
+      "백업 또는 원본 데이터를 확인하세요. " + error.message,
+      true
+    );
+    return [];
+  }
+}
+
+function writeStoredRecords(nextRecords){
+  const normalized = validateRecordArray(nextRecords);
+  const payload = {
+    app: "Session Map Kit",
+    version: VERSION,
+    savedAt: new Date().toISOString(),
+    records: normalized
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  return normalized;
+}
+
+function saveCurrent(){
+  if(!unlocked) return false;
+  syncVisibleInputs();
+
+  if(!storageHealthy){
+    notify(
+      "기존 저장 데이터 읽기에 실패한 상태입니다. " +
+      "일반 저장을 중단했습니다. 백업 확인·복원 후 사용하세요.",
+      true
+    );
+    return false;
+  }
+
+  if(!current.inputs.name.trim()){
+    notify("이름 또는 관리용 식별명을 입력하세요.", true);
+    return false;
+  }
+
+  const numeric = numericError(current);
+  if(numeric){
+    notify(numeric, true);
+    return false;
+  }
+
+  try{
+    const candidate = copy(current);
+    candidate.updatedAt = new Date().toISOString();
+
+    const normalized = normalizeRecord(candidate);
+    const next = records.map(copy);
+    const index = next.findIndex(r=>r.id === normalized.id);
+
+    if(index >= 0){
+      next[index] = normalized;
+    } else {
+      if(next.length >= MAX_RECORDS){
+        throw new Error("최대 기록 개수에 도달했습니다.");
+      }
+      next.push(normalized);
+    }
+
+    records = writeStoredRecords(next);
+    current = copy(records.find(r=>r.id === normalized.id));
+    dirty = false;
+
+    updateIdentity();
+    renderRecordList();
+
+    notify(
+      "이 브라우저에 저장했습니다. " +
+      "다른 기기로 자동 동기화되지 않습니다. 정기적으로 백업하세요."
+    );
+    return true;
+  } catch(error){
+    notify(
+      "저장 실패: " + error.message +
+      " 입력은 화면에 남아 있습니다. 지우거나 페이지를 닫지 마세요.",
+      true
+    );
+    return false;
+  }
+}
+
+function canLeaveCurrent(){
+  if(!dirty) return true;
+  return confirm(
+    "저장되지 않은 변경이 있습니다.\n" +
+    "저장하지 않고 현재 입력을 떠날까요?"
+  );
+}
+
+function startNewMember(){
+  if(!canLeaveCurrent()) return;
+
+  current = blankRecord();
+  dirty = false;
+  renderAll();
+  showTab("inputPage");
+  notify("새 회원의 빈 세션입니다.");
+}
+
+function startFollowup(){
+  if(!current.inputs.name.trim()){
+    notify("현재 회원의 식별명을 먼저 입력하세요.", true);
+    return;
+  }
+
+  if(dirty){
+    const saveFirst = confirm(
+      "현재 회차에 저장되지 않은 변경이 있습니다.\n" +
+      "현재 회차를 저장한 뒤 같은 회원의 새 회차를 만들까요?"
+    );
+    if(!saveFirst || !saveCurrent()) return;
+  }
+
+  const previous = copy(current);
+  const next = blankRecord();
+
+  next.memberId = previous.memberId;
+
+  ["name", "age", "gender", "staff", "memo"].forEach(id=>{
+    next.inputs[id] = previous.inputs[id];
+  });
+
+  const visits = records
+    .filter(r=>r.memberId === previous.memberId)
+    .map(r=>Number(r.inputs.visit))
+    .filter(Number.isFinite);
+
+  const previousVisit = Number(previous.inputs.visit) || 0;
+  next.inputs.visit = String(
+    Math.max(previousVisit, 0, ...visits) + 1
+  );
+
+  /* 이전 회차의 증상·안전성·촬영·평가를 새 사실로 복사하지 않습니다. */
+  current = next;
+  dirty = true;
+  renderAll();
+  showTab("inputPage");
+
+  notify(
+    "같은 회원의 새 회차를 만들었습니다. " +
+    "오늘의 증상·안전성·촬영·평가는 새로 확인하세요."
+  );
 }
 
 function loadRecord(id){
-  const r = getRecords().find(x=>x.id === id);
-  if(!r) return;
+  const found = records.find(r=>r.id === id);
+  if(!found) return;
+  if(!canLeaveCurrent()) return;
 
-  currentRecordId = r.id;
+  /* 전체 모델을 교체하므로 이전 회원 값이 남지 않습니다. */
+  current = copy(found);
+  dirty = false;
 
-  [
-    "name",
-    "age",
-    "gender",
-    "memo",
-    "primarySymptom",
-    "primarySide",
-    "secondarySymptom",
-    "secondarySide",
-    "primaryPain",
-    "secondaryPain",
-    "goal"
-  ].forEach(k=>setVal(k, r[k]));
-
-  setChecked("severe", migrateOldItemArray(r.severe));
-  setChecked("warning", migrateOldItemArray(r.warning));
-  setChecked("normal", migrateOldItemArray(r.normal));
-
-  Object.entries(r.directions || {}).forEach(([k,v])=>{
-    setVal(k,v);
-  });
-
-  latestRecommendations = r.recommendations || [];
-  latestPatterns = r.patterns || [];
-
-  renderSummary();
-  renderPatterns();
-  renderRecommendations();
-  renderSessionRecordArea(r.sessions);
-
-  showTabById("inputTab");
+  renderAll();
+  showTab("inputPage");
+  notify("저장된 회차를 불러왔습니다.");
 }
 
-function newRecord(){
-  currentRecordId = null;
-  latestRecommendations = [];
-  latestPatterns = [];
-
-  document.querySelectorAll("input,textarea").forEach(x=>{
-    if(x.type === "checkbox") x.checked = false;
-    else if(x.type === "number") x.value = 0;
-    else x.value = "";
-  });
-
-  document.querySelectorAll("select").forEach(x=>{
-    x.selectedIndex = 0;
-  });
-
-  setVal("primaryPain", 0);
-  setVal("secondaryPain", 0);
-
-  document.getElementById("summaryArea").innerHTML = "";
-  document.getElementById("patternArea").innerHTML = "";
-  document.getElementById("recommendationArea").innerHTML = "";
-
-  renderSessionRecordArea();
-}
-
-function deleteCurrentRecord(){
-  if(!currentRecordId){
-    alert("삭제할 기록이 없습니다.");
+function deleteRecord(id){
+  if(!storageHealthy){
+    notify("저장 데이터 상태를 먼저 확인하세요.", true);
     return;
   }
 
-  if(!confirm("현재 기록을 삭제할까요?")) return;
+  const found = records.find(r=>r.id === id);
+  if(!found) return;
 
-  localStorage.setItem(
-    "motiRecords",
-    JSON.stringify(getRecords().filter(x=>x.id !== currentRecordId))
+  const ok = confirm(
+    `${found.inputs.name} / ${found.inputs.date} / ` +
+    `${found.inputs.visit || "미기록"}회차를 삭제할까요?\n` +
+    "다른 회차는 삭제하지 않습니다. 삭제 전 백업을 권장합니다."
   );
+  if(!ok) return;
 
-  newRecord();
-  renderMemberList();
+  try{
+    const next = records.filter(r=>r.id !== id);
+    records = writeStoredRecords(next);
+
+    if(current.id === id){
+      current = blankRecord();
+      dirty = false;
+      renderAll();
+    }
+
+    renderRecordList();
+    notify("선택한 회차를 삭제했습니다.");
+  } catch(error){
+    notify("삭제 저장 실패: " + error.message, true);
+  }
 }
 
-function exportData(){
+/* -----------------------------
+   회원·회차 목록
+----------------------------- */
+
+function renderRecordList(){
+  const root = $("recordList");
+  root.replaceChildren();
+
+  const search = $("searchInput").value.trim().toLowerCase();
+
+  const filtered = records
+    .filter(r=>{
+      const haystack =
+        `${r.inputs.name} ${r.memberId}`.toLowerCase();
+      return !search || haystack.includes(search);
+    })
+    .sort((a,b)=>{
+      const dateDiff =
+        b.inputs.date.localeCompare(a.inputs.date);
+      return dateDiff ||
+        Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+    });
+
+  if(!filtered.length){
+    const p = document.createElement("p");
+    p.className = "small";
+    p.textContent = storageHealthy
+      ? "표시할 저장 기록이 없습니다."
+      : "저장 데이터를 읽지 못한 상태입니다.";
+    root.appendChild(p);
+    return;
+  }
+
+  const groups = new Map();
+  filtered.forEach(r=>{
+    if(!groups.has(r.memberId)) groups.set(r.memberId, []);
+    groups.get(r.memberId).push(r);
+  });
+
+  groups.forEach((group, memberId)=>{
+    const details = document.createElement("details");
+    details.open = Boolean(search);
+
+    const summary = document.createElement("summary");
+    summary.textContent =
+      `${group[0].inputs.name} — ${group.length}개 회차`;
+    details.appendChild(summary);
+
+    const idText = document.createElement("p");
+    idText.className = "small";
+    idText.textContent = "회원 ID: " + memberId;
+    details.appendChild(idText);
+
+    group.forEach(r=>{
+      const row = document.createElement("div");
+      row.className = "member";
+
+      const open = document.createElement("button");
+      open.type = "button";
+      open.textContent =
+        `${r.inputs.date} / ${r.inputs.visit || "미기록"}회차 / ` +
+        `${r.inputs.primarySymptom} / ${r.inputs.primarySide}`;
+      open.addEventListener("click", ()=>loadRecord(r.id));
+      row.appendChild(open);
+
+      const stamp = document.createElement("p");
+      stamp.className = "small";
+      stamp.textContent =
+        "최종 저장: " +
+        new Date(r.updatedAt).toLocaleString("ko-KR");
+      row.appendChild(stamp);
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "red";
+      remove.textContent = "이 회차 삭제";
+      remove.addEventListener("click", ()=>deleteRecord(r.id));
+      row.appendChild(remove);
+
+      details.appendChild(row);
+    });
+
+    root.appendChild(details);
+  });
+}
+
+/* -----------------------------
+   백업
+----------------------------- */
+
+function downloadJSON(payload, filename){
   const blob = new Blob(
-    [JSON.stringify(getRecords(), null, 2)],
-    {type:"application/json"}
+    [JSON.stringify(payload, null, 2)],
+    {type:"application/json;charset=utf-8"}
   );
 
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `moti_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
 }
 
-function importData(e){
-  const f = e.target.files[0];
-  if(!f) return;
+function backupPayload(){
+  return {
+    app: "Session Map Kit",
+    version: VERSION,
+    exportedAt: new Date().toISOString(),
+    records: copy(records)
+  };
+}
 
-  const reader = new FileReader();
-
-  reader.onload = ()=>{
+function exportAll(){
+  if(!storageHealthy){
     try{
-      const arr = JSON.parse(reader.result);
-      if(!Array.isArray(arr)) throw Error();
+      const raw = localStorage.getItem(STORAGE_KEY);
+      downloadJSON(
+        {
+          app: "Session Map Kit raw recovery",
+          exportedAt: new Date().toISOString(),
+          warning: "정상 검증을 통과하지 않은 원본 저장 문자열입니다.",
+          rawStoredText: raw
+        },
+        `session_map_raw_recovery_${today()}.json`
+      );
+      notify(
+        "검증되지 않은 원본 복구용 파일 다운로드를 요청했습니다. " +
+        "일반 복원 파일과 다릅니다."
+      );
+    } catch(error){
+      notify("원본 백업 실패: " + error.message, true);
+    }
+    return;
+  }
 
-      localStorage.setItem("motiRecords", JSON.stringify(arr));
-      renderMemberList();
-      alert("복원 완료");
-    } catch {
-      alert("JSON 파일 형식이 올바르지 않습니다.");
+  if(dirty){
+    const save = confirm(
+      "저장되지 않은 현재 입력이 있습니다.\n" +
+      "현재 회차를 저장하고 전체 백업을 만들까요?\n\n" +
+      "취소하면 백업 작업을 중단합니다."
+    );
+    if(!save || !saveCurrent()) return;
+  }
+
+  downloadJSON(
+    backupPayload(),
+    `session_map_backup_${today()}.json`
+  );
+
+  notify(
+    "백업 다운로드를 요청했습니다. 파일 앱에서 실제 저장을 확인하세요. " +
+    "백업 파일은 암호화되지 않았습니다."
+  );
+}
+
+/* -----------------------------
+   이전 앱 데이터 변환
+----------------------------- */
+
+function migrateFindingName(name){
+  const aliases = {
+    "흉추 커브 감소": "흉추 커브 정도",
+    "골반 후방 경사": "골반 경사"
+  };
+  return aliases[name] || name;
+}
+
+function safeOldString(value){
+  if(value === null || value === undefined) return "";
+  return validatedString(value, "이전 기록");
+}
+
+function setMigratedSelect(record, id, value){
+  const s = ALL_SPECS.find(item=>item.id === id);
+  if(s?.type === "select" && s.options.includes(value)){
+    record.inputs[id] = value;
+  }
+}
+
+function migrateLegacyRecord(raw){
+  if(!isObject(raw)){
+    throw new Error("이전 기록 항목 형식이 올바르지 않습니다.");
+  }
+
+  const r = blankRecord();
+  const oldId = validId(String(raw.id ?? ""))
+    ? String(raw.id) : uid();
+
+  r.id = "legacy-" + oldId;
+  if(!validId(r.id)) r.id = uid();
+
+  /* 이름으로 회원을 자동 합치지 않습니다.
+     이전 앱에는 안정적인 회원 ID가 없었기 때문입니다. */
+  r.memberId = "member-" + oldId;
+  if(!validId(r.memberId)) r.memberId = uid();
+
+  const stamp = Number.isFinite(Date.parse(raw.updatedAt))
+    ? raw.updatedAt : new Date().toISOString();
+
+  r.createdAt = stamp;
+  r.updatedAt = stamp;
+
+  const d = new Date(stamp);
+  r.inputs.date = [
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,"0"),
+    String(d.getDate()).padStart(2,"0")
+  ].join("-");
+
+  ["name", "age", "memo", "goal"].forEach(id=>{
+    r.inputs[id] = safeOldString(raw[id]);
+  });
+
+  if(r.inputs.age === "0") r.inputs.age = "";
+
+  const mapSymptom = value =>
+    value === "자세교정/체형교정"
+      ? "자세·체형 상담" : value;
+
+  setMigratedSelect(
+    r, "primarySymptom",
+    mapSymptom(safeOldString(raw.primarySymptom))
+  );
+  setMigratedSelect(
+    r, "secondarySymptom",
+    mapSymptom(safeOldString(raw.secondarySymptom))
+  );
+
+  ["primarySide", "secondarySide"].forEach(id=>{
+    setMigratedSelect(r, id, safeOldString(raw[id]));
+  });
+
+  const gender = raw.gender === "기타/미기재"
+    ? "기타" : safeOldString(raw.gender);
+  setMigratedSelect(r, "gender", gender);
+
+  /* 이전 앱의 NRS 0은 기본값일 수도 있으므로
+     새 형식에서 측정된 무통으로 자동 확정하지 않습니다.
+     원문은 legacy에 보존합니다. */
+  ["primaryPain", "secondaryPain"].forEach(id=>{
+    const n = numberOrNull(raw[id]);
+    r.inputs[id] =
+      n !== null && n > 0 && n <= 10 ? String(n) : "";
+  });
+
+  const oldGradeArrays = [
+    ["normal", "유지"],
+    ["warning", "경계"],
+    ["severe", "심각"]
+  ];
+
+  oldGradeArrays.forEach(([key, status])=>{
+    const arr = raw[key] ?? [];
+    if(!Array.isArray(arr)){
+      throw new Error("이전 촬영 등급 배열 형식이 올바르지 않습니다.");
+    }
+
+    arr.forEach(name=>{
+      if(typeof name !== "string"){
+        throw new Error("이전 촬영 항목명 형식이 올바르지 않습니다.");
+      }
+
+      const converted = migrateFindingName(name);
+      if(Object.prototype.hasOwnProperty.call(r.findings, converted)){
+        r.findings[converted] = status;
+      }
+    });
+  });
+
+  const dirs = isObject(raw.directions) ? raw.directions : {};
+  const maps = {
+    shoulderSide:{
+      "좌측 어깨 높음":"좌측 높음",
+      "우측 어깨 높음":"우측 높음"
+    },
+    pelvisHeightSide:{
+      "좌측 높음":"좌측 높음",
+      "우측 높음":"우측 높음"
+    },
+    pelvisRotation:{
+      "좌측 골반 전방":"좌측 골반 전방",
+      "우측 골반 전방":"우측 골반 전방"
+    },
+    thoraxRotation:{
+      "좌회전 우세":"좌회전",
+      "우회전 우세":"우회전"
+    },
+    thoracicCurveDir:{
+      "흉추 커브 증가":"증가",
+      "흉추 커브 감소":"감소"
+    },
+    pelvicTiltDir:{
+      "골반 전방 경사":"전방 경사",
+      "골반 후방 경사":"후방 경사"
+    },
+    lumbarCurveDir:{
+      "요추 전만 증가":"증가",
+      "요추 전만 감소":"감소"
+    },
+    leftFootDir:{
+      "정면":"정면","내회전":"안쪽","외회전":"바깥쪽"
+    },
+    rightFootDir:{
+      "정면":"정면","내회전":"안쪽","외회전":"바깥쪽"
+    },
+    leftArch:{
+      "유지":"관찰상 유지","무너짐":"낮게 관찰"
+    },
+    rightArch:{
+      "유지":"관찰상 유지","무너짐":"낮게 관찰"
     }
   };
 
-  reader.readAsText(f);
+  Object.entries(maps).forEach(([id, valueMap])=>{
+    const mapped = valueMap[dirs[id]];
+    if(mapped) setMigratedSelect(r, id, mapped);
+  });
+
+  /* 이전 IR/ER·무릎 관찰값은 평가 방법·출처가 불명확할 수 있어
+     새 직접평가 필드에 자동 이식하지 않습니다. */
+  r.inputs.safetyStatus = "미확인";
+  r.inputs.visit = "";
+
+  r.inputs.photoLimits =
+    "이전 앱에서 가져온 값입니다. 촬영·평가 조건을 다시 확인하세요. " +
+    "중복 등급이 있었다면 표시 등급은 심각 > 경계 > 유지 순으로 " +
+    "정리했으며 원문은 보존했습니다.";
+
+  r.legacy = validatePreservedJSON(raw, "이전 기록");
+  return normalizeRecord(r);
 }
 
-function esc(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+function migrateLegacyArray(arr){
+  if(!Array.isArray(arr) || arr.length > MAX_RECORDS){
+    throw new Error("이전 기록 배열·개수를 확인하세요.");
+  }
+
+  return validateRecordArray(arr.map(migrateLegacyRecord));
 }
 
-init();
+function importLegacyStorage(){
+  if(!storageHealthy){
+    notify("현재 저장 상태를 먼저 확인·복원하세요.", true);
+    return;
+  }
+
+  if(!canLeaveCurrent()) return;
+
+  try{
+    const raw = localStorage.getItem(LEGACY_KEY);
+    if(!raw){
+      notify(
+        "같은 사이트 저장 공간에서 이전 motiRecords를 찾지 못했습니다. " +
+        "이전 앱의 JSON 백업 파일로 복원할 수 있습니다."
+      );
+      return;
+    }
+
+    const oldArray = JSON.parse(raw);
+    const migrated = migrateLegacyArray(oldArray);
+
+    const existingIds = new Set(records.map(r=>r.id));
+    const additions = migrated.filter(r=>!existingIds.has(r.id));
+
+    if(!additions.length){
+      notify("추가로 가져올 이전 기록이 없습니다.");
+      return;
+    }
+
+    if(records.length + additions.length > MAX_RECORDS){
+      throw new Error("가져온 후 최대 기록 개수를 초과합니다.");
+    }
+
+    if(!confirm(
+      `이전 기록 ${additions.length}개를 추가할까요?\n` +
+      "이전 저장 원본은 삭제하지 않습니다.\n" +
+      "이전 추천은 원문 보관이며 새 규칙으로 검증된 것은 아닙니다."
+    )) return;
+
+    if(records.length){
+      downloadJSON(
+        backupPayload(),
+        `session_map_before_legacy_${today()}.json`
+      );
+    }
+
+    records = writeStoredRecords([...records, ...additions]);
+    current = blankRecord();
+    dirty = false;
+
+    renderAll();
+    renderRecordList();
+    showTab("recordsPage");
+
+    notify(
+      "이전 기록을 추가했습니다. " +
+      "이름이 같아도 회원을 자동 합치지 않았습니다."
+    );
+  } catch(error){
+    notify("이전 기록 가져오기 실패: " + error.message, true);
+  }
+}
+
+/* -----------------------------
+   파일 복원
+----------------------------- */
+
+function decodeBackup(parsed){
+  if(Array.isArray(parsed)){
+    if(parsed.length === 0) return [];
+
+    const isNew = parsed.every(r=>
+      isObject(r) && isObject(r.inputs) && validId(r.memberId)
+    );
+
+    return isNew
+      ? validateRecordArray(parsed)
+      : migrateLegacyArray(parsed);
+  }
+
+  if(
+    isObject(parsed) &&
+    parsed.version === VERSION &&
+    Array.isArray(parsed.records)
+  ){
+    return validateRecordArray(parsed.records);
+  }
+
+  throw new Error(
+    "지원하는 새 형식 백업 또는 이전 앱의 기록 배열이 아닙니다."
+  );
+}
+
+async function importBackup(event){
+  const file = event.target.files?.[0];
+  if(!file) return;
+
+  try{
+    if(file.size > MAX_FILE_BYTES){
+      throw new Error(
+        "복원 파일이 8MB를 초과했습니다. " +
+        "파일을 임의로 잘라내지 말고 별도 복원 지원이 필요합니다."
+      );
+    }
+
+    const fileText = await file.text();
+    const parsed = JSON.parse(fileText);
+    const imported = decodeBackup(parsed);
+
+    if(!canLeaveCurrent()) return;
+
+    const proceed = confirm(
+      `백업 기록 ${imported.length}개를 복원합니다.\n` +
+      "현재 새 형식 저장 기록은 교체됩니다.\n" +
+      "복원 전에 현재 저장 데이터 백업 다운로드를 요청합니다.\n\n" +
+      "계속할까요?"
+    );
+    if(!proceed) return;
+
+    if(storageHealthy){
+      downloadJSON(
+        backupPayload(),
+        `session_map_before_restore_${today()}.json`
+      );
+    } else {
+      const rawStoredText = localStorage.getItem(STORAGE_KEY);
+      downloadJSON(
+        {
+          exportedAt: new Date().toISOString(),
+          warning:"복원 전 검증되지 않은 저장 원문",
+          rawStoredText
+        },
+        `session_map_raw_before_restore_${today()}.json`
+      );
+    }
+
+    const confirmed = confirm(
+      "현재 데이터 백업 다운로드를 요청했습니다.\n" +
+      "백업 보관 여부를 확인한 뒤 실제 교체를 진행하세요.\n\n" +
+      "저장 기록을 백업 내용으로 교체할까요?"
+    );
+    if(!confirmed) return;
+
+    records = writeStoredRecords(imported);
+    storageHealthy = true;
+    current = blankRecord();
+    dirty = false;
+
+    renderAll();
+    renderRecordList();
+    showTab("recordsPage");
+
+    notify("복원 완료. 기록 개수와 내용을 확인하세요.");
+  } catch(error){
+    notify("복원 실패: " + error.message, true);
+  } finally {
+    event.target.value = "";
+  }
+}
+
+/* -----------------------------
+   화면 잠금
+----------------------------- */
+
+function lockApp(reason = ""){
+  syncVisibleInputs();
+  unlocked = false;
+  $("lock").classList.remove("hidden");
+  $("passwordInput").value = "";
+  $("lockMessage").textContent = reason;
+}
+
+function unlockApp(event){
+  event.preventDefault();
+
+  if($("passwordInput").value !== APP_PASSWORD){
+    $("lockMessage").textContent = "비밀번호가 맞지 않습니다.";
+    return;
+  }
+
+  unlocked = true;
+  lastActivity = Date.now();
+  $("passwordInput").value = "";
+  $("lockMessage").textContent = "";
+  $("lock").classList.add("hidden");
+
+  if(APP_PASSWORD === "여기를-새-비밀번호로-변경"){
+    notify(
+      "기본 비밀번호 상태입니다. HTML의 APP_PASSWORD를 새 값으로 변경하세요.",
+      true
+    );
+  }
+}
+
+function recordActivity(){
+  if(unlocked) lastActivity = Date.now();
+}
+
+function checkAutoLock(){
+  if(unlocked && Date.now() - lastActivity >= AUTO_LOCK_MS){
+    lockApp(
+      "10분 동안 사용하지 않아 화면을 잠갔습니다. " +
+      "입력은 화면 메모리에 유지되지만 자동 저장된 것은 아닙니다."
+    );
+  }
+}
+
+/* -----------------------------
+   기본 논리 점검
+   임상 검증·실제 브라우저 검증은 아닙니다.
+----------------------------- */
+
+function runSelfTests(){
+  const results = [];
+
+  function test(name, fn){
+    try{
+      if(fn() !== true) throw new Error("조건 불충족");
+      results.push("통과: " + name);
+    } catch(error){
+      results.push("실패: " + name + " — " + error.message);
+    }
+  }
+
+  test("촬영 미입력에서 비정상 후보를 만들지 않음", ()=>{
+    const r = blankRecord();
+    return photoCandidates(r).length === 0;
+  });
+
+  test("유지를 비정상 후보로 취급하지 않음", ()=>{
+    const r = blankRecord();
+    FINDING_INFO.forEach(f=>r.findings[f.name] = "유지");
+    return photoCandidates(r).length === 0;
+  });
+
+  test("안전성 미확인에서 진행 후보 생성 게이트 차단", ()=>{
+    return safetyGate(blankRecord()).blocked === true;
+  });
+
+  test("응급 우려는 진행 상태보다 우선", ()=>{
+    const r = blankRecord();
+    r.inputs.safetyStatus = "확인 후 진행";
+    r.flags.emergency = ["chest"];
+    return safetyGate(r).blocked === true &&
+      safetyGate(r).level === "bad";
+  });
+
+  test("우려 항목은 판단 근거 기록 필요", ()=>{
+    const r = blankRecord();
+    r.inputs.safetyStatus = "확인 후 진행";
+    r.flags.concern = ["history"];
+    return safetyGate(r).blocked === true;
+  });
+
+  test("발목/발 증상을 목 증상으로 분류하지 않음", ()=>{
+    return REGION_BY_SYMPTOM["발목/발 통증"] === "foot";
+  });
+
+  test("기준 과제가 없으면 후보 생성하지 않음", ()=>{
+    return buildHypotheses(blankRecord()).length === 0;
+  });
+
+  test("기준 과제에서 세 관점 후보 생성", ()=>{
+    const r = blankRecord();
+    r.inputs.taskKind = "계단·스텝다운";
+    r.inputs.primarySymptom = "무릎 통증";
+    const hs = buildHypotheses(r);
+
+    return hs.length === 3 &&
+      new Set(hs.map(h=>h.origin)).size === 3;
+  });
+
+  test("NRS 0을 빈칸으로 바꾸지 않음", ()=>{
+    const r = blankRecord();
+    r.inputs.primaryPain = "0";
+    return normalizeRecord(r).inputs.primaryPain === "0";
+  });
+
+  test("조건이 다르면 동일 조건 수치 개선을 출력하지 않음", ()=>{
+    const h = blankHypothesis(0);
+    h.beforePain = "5";
+    h.afterPain = "2";
+    h.comparison = "다름";
+
+    return !interpretation(h).some(
+      line=>line.includes("NRS 차이(전−후)")
+    );
+  });
+
+  test("전 NRS 0에서 통증 감소 설명을 제한", ()=>{
+    const h = blankHypothesis(0);
+    h.beforePain = "0";
+    h.afterPain = "0";
+    h.comparison = "같음";
+
+    return interpretation(h).some(
+      line=>line.includes("통증 감소로 설명하지")
+    );
+  });
+
+  test("확인된 평가 제한이 없으면 사실을 추가하지 않음", ()=>{
+    return confirmedExam(blankRecord()).length === 0;
+  });
+
+  test("알 수 없는 선택 값을 복원하지 않음", ()=>{
+    const r = blankRecord();
+    r.inputs.primarySymptom = "알 수 없는 값";
+
+    try{
+      normalizeRecord(r);
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  test("중복 세션 ID 복원 차단", ()=>{
+    const r = blankRecord();
+
+    try{
+      validateRecordArray([r, copy(r)]);
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  $("testOutput").textContent =
+    results.join("\n") +
+    "\n\n이 점검은 기본 코드 조건만 확인합니다. " +
+    "임상 타당성, iPad Safari 저장·인쇄·다운로드 동작을 검증하지 않습니다.";
+}
+
+/* -----------------------------
+   이벤트 등록·시작
+----------------------------- */
+
+function initializeApp(){
+  /* 앞부분 표시에서 섞인 다른 언어를 한국어로 바로잡습니다. */
+  document.querySelector("#lock h2").textContent =
+    "개인용 화면 잠금";
+
+  $("lockExplanation").textContent =
+    "이 잠금은 화면 접근을 제한하는 편의 기능입니다. " +
+    "서버 인증이나 저장 데이터 암호화가 아닙니다.";
+
+  records = readStoredRecords();
+  current = blankRecord();
+
+  renderAll();
+  renderRecordList();
+
+  document.querySelectorAll("[data-tab]").forEach(button=>{
+    button.addEventListener("click", ()=>{
+      if(!unlocked) return;
+      showTab(button.dataset.tab);
+    });
+  });
+
+  /* input 이벤트는 텍스트·숫자·선택·체크 변경을 즉시 모델에 반영합니다. */
+  $("inputPage").addEventListener("input", handleEditorInput);
+
+  $("unlockForm").addEventListener("submit", unlockApp);
+  $("lockButton").addEventListener("click", ()=>lockApp());
+
+  $("newMemberButton").addEventListener("click", startNewMember);
+  $("followupButton").addEventListener("click", startFollowup);
+  $("saveTopButton").addEventListener("click", saveCurrent);
+  $("saveBottomButton").addEventListener("click", saveCurrent);
+  $("generateButton").addEventListener("click", generateCandidates);
+
+  $("searchInput").addEventListener("input", renderRecordList);
+  $("exportButton").addEventListener("click", exportAll);
+  $("legacyButton").addEventListener("click", importLegacyStorage);
+  $("importFile").addEventListener("change", importBackup);
+  $("testButton").addEventListener("click", runSelfTests);
+
+  $("printButton").addEventListener("click", ()=>{
+    syncVisibleInputs();
+
+    const numeric = numericError(current);
+    if(numeric){
+      notify(numeric, true);
+      return;
+    }
+
+    window.print();
+  });
+
+  ["pointerdown", "keydown", "input", "touchstart"].forEach(type=>{
+    document.addEventListener(type, recordActivity, {passive:true});
+  });
+
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState === "visible"){
+      checkAutoLock();
+    }
+  });
+
+  setInterval(checkAutoLock, 15000);
+
+  window.addEventListener("beforeunload", event=>{
+    if(!dirty) return;
+
+    event.preventDefault();
+    event.returnValue = "";
+  });
+
+  /* Safari에서 이 경고가 항상 표시되는 것은 아닙니다.
+     따라서 자동 저장으로 간주하지 말고 저장 버튼을 사용하세요. */
+
+  if(storageHealthy){
+    notify(
+      "개인용 규칙 기반 참고 도구입니다. " +
+      "실제 회원 사용 전 가상 사례로 저장·불러오기·백업·복원을 확인하세요."
+    );
+  }
+}
+
+initializeApp();
 </script>
 </body>
 </html>
